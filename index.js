@@ -29,31 +29,31 @@ const logChannels = new Map();
 const commands = [
 
   new SlashCommandBuilder().setName('kick').setDescription('Kick user')
-    .addUserOption(o => o.setName('user').setDescription('User').setRequired(true)),
+    .addUserOption(o => o.setName('user').setDescription('User to kick').setRequired(true)),
 
   new SlashCommandBuilder().setName('ban').setDescription('Ban user')
-    .addUserOption(o => o.setName('user').setDescription('User').setRequired(true)),
+    .addUserOption(o => o.setName('user').setDescription('User to ban').setRequired(true)),
 
   new SlashCommandBuilder().setName('clear').setDescription('Clear messages')
     .addIntegerOption(o => o.setName('amount').setDescription('Amount').setRequired(true)),
 
   new SlashCommandBuilder().setName('warn').setDescription('Warn user')
-    .addUserOption(o => o.setName('user').setDescription('User').setRequired(true)),
+    .addUserOption(o => o.setName('user').setDescription('User to warn').setRequired(true)),
 
-  new SlashCommandBuilder().setName('ping').setDescription('Ping'),
+  new SlashCommandBuilder().setName('ping').setDescription('Check latency'),
 
-  new SlashCommandBuilder().setName('avatar').setDescription('Avatar')
+  new SlashCommandBuilder().setName('avatar').setDescription('Show avatar')
     .addUserOption(o => o.setName('user').setDescription('User')),
 
   new SlashCommandBuilder().setName('userinfo').setDescription('User info')
     .addUserOption(o => o.setName('user').setDescription('User')),
 
-  new SlashCommandBuilder().setName('mute').setDescription('Mute user')
-    .addUserOption(o => o.setName('user').setDescription('User').setRequired(true))
+  new SlashCommandBuilder().setName('mute').setDescription('Timeout user')
+    .addUserOption(o => o.setName('user').setDescription('User to mute').setRequired(true))
     .addIntegerOption(o => o.setName('minutes').setDescription('Minutes').setRequired(true)),
 
-  new SlashCommandBuilder().setName('unmute').setDescription('Unmute user')
-    .addUserOption(o => o.setName('user').setDescription('User').setRequired(true)),
+  new SlashCommandBuilder().setName('unmute').setDescription('Remove timeout')
+    .addUserOption(o => o.setName('user').setDescription('User to unmute').setRequired(true)),
 
   new SlashCommandBuilder().setName('purge').setDescription('Delete messages')
     .addIntegerOption(o => o.setName('amount').setDescription('Amount').setRequired(true)),
@@ -61,14 +61,14 @@ const commands = [
   new SlashCommandBuilder().setName('setlog').setDescription('Set log channel')
     .addChannelOption(o => 
       o.setName('channel')
-       .setDescription('Text channel')
+       .setDescription('Select a text channel')
        .addChannelTypes(ChannelType.GuildText)
        .setRequired(true)
     ),
 
   new SlashCommandBuilder().setName('meme').setDescription('Random meme'),
 
-  new SlashCommandBuilder().setName('coinflip').setDescription('Flip coin'),
+  new SlashCommandBuilder().setName('coinflip').setDescription('Flip a coin'),
 
   new SlashCommandBuilder().setName('say').setDescription('Make bot say something')
     .addStringOption(o => o.setName('text').setDescription('Message').setRequired(true)),
@@ -85,7 +85,7 @@ client.once('ready', async () => {
       body: commands.map(cmd => cmd.toJSON())
     });
 
-    console.log("Commands loaded globally (may take time to appear)");
+    console.log("✅ Commands loaded (global)");
   } catch (err) {
     console.error(err);
   }
@@ -176,10 +176,6 @@ client.on('interactionCreate', async interaction => {
 
       const channel = interaction.options.getChannel("channel");
 
-      if (channel.type !== ChannelType.GuildText) {
-        return interaction.reply({ content: "❌ Must be a text channel", ephemeral: true });
-      }
-
       logChannels.set(interaction.guild.id, channel.id);
 
       return interaction.reply(`📌 Logs set to ${channel}`);
@@ -221,21 +217,37 @@ client.on('interactionCreate', async interaction => {
   }
 });
 
-// ===== LOGS =====
-client.on("messageDelete", msg => {
-  const logId = logChannels.get(msg.guild?.id);
+// ===== LOG SYSTEM (FIXED) =====
+client.on("messageDelete", async msg => {
+  if (!msg.guild) return;
+
+  const logId = logChannels.get(msg.guild.id);
   if (!logId) return;
 
   const ch = msg.guild.channels.cache.get(logId);
-  if (ch) ch.send(`🗑️ Deleted: ${msg.content}`);
+  if (!ch) return;
+
+  try {
+    await ch.send(`🗑️ ${msg.author?.tag || "Unknown"}: ${msg.content || "No text"}`);
+  } catch (err) {
+    console.error("Log error:", err);
+  }
 });
 
-client.on("guildBanAdd", ban => {
+client.on("guildBanAdd", async ban => {
+  if (!ban.guild) return;
+
   const logId = logChannels.get(ban.guild.id);
   if (!logId) return;
 
   const ch = ban.guild.channels.cache.get(logId);
-  if (ch) ch.send(`🔨 ${ban.user.tag} banned`);
+  if (!ch) return;
+
+  try {
+    await ch.send(`🔨 ${ban.user.tag} banned`);
+  } catch (err) {
+    console.error("Ban log error:", err);
+  }
 });
 
 client.login(TOKEN);
