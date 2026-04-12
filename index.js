@@ -14,106 +14,80 @@ const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildMembers // ✅ IMPORTANT FIX
   ]
 });
 
 const TOKEN = process.env.TOKEN;
 const CLIENT_ID = process.env.CLIENT_ID;
 
-// ===== LOG STORAGE =====
 const logChannels = new Map();
 
 // ===== COMMANDS =====
 const commands = [
-
-  new SlashCommandBuilder()
-    .setName('kick')
-    .setDescription('Kick user')
-    .addUserOption(o => o.setName('user').setDescription('User to kick').setRequired(true)),
-
-  new SlashCommandBuilder()
-    .setName('ban')
-    .setDescription('Ban user')
-    .addUserOption(o => o.setName('user').setDescription('User to ban').setRequired(true)),
-
-  new SlashCommandBuilder()
-    .setName('clear')
-    .setDescription('Clear messages')
-    .addIntegerOption(o => o.setName('amount').setDescription('Amount').setRequired(true)),
-
-  new SlashCommandBuilder()
-    .setName('warn')
-    .setDescription('Warn user')
+  new SlashCommandBuilder().setName('kick').setDescription('Kick user')
     .addUserOption(o => o.setName('user').setDescription('User').setRequired(true)),
 
-  new SlashCommandBuilder()
-    .setName('ping')
-    .setDescription('Check latency'),
+  new SlashCommandBuilder().setName('ban').setDescription('Ban user')
+    .addUserOption(o => o.setName('user').setDescription('User').setRequired(true)),
 
-  new SlashCommandBuilder()
-    .setName('avatar')
-    .setDescription('Show avatar')
+  new SlashCommandBuilder().setName('clear').setDescription('Clear messages')
+    .addIntegerOption(o => o.setName('amount').setDescription('Amount').setRequired(true)),
+
+  new SlashCommandBuilder().setName('warn').setDescription('Warn user')
+    .addUserOption(o => o.setName('user').setDescription('User').setRequired(true)),
+
+  new SlashCommandBuilder().setName('ping').setDescription('Check latency'),
+
+  new SlashCommandBuilder().setName('avatar').setDescription('Show avatar')
     .addUserOption(o => o.setName('user').setDescription('User').setRequired(false)),
 
-  new SlashCommandBuilder()
-    .setName('userinfo')
-    .setDescription('User info')
+  new SlashCommandBuilder().setName('userinfo').setDescription('User info')
     .addUserOption(o => o.setName('user').setDescription('User').setRequired(false)),
 
-  new SlashCommandBuilder()
-    .setName('mute')
-    .setDescription('Timeout user')
+  new SlashCommandBuilder().setName('mute').setDescription('Timeout user')
     .addUserOption(o => o.setName('user').setDescription('User').setRequired(true))
     .addIntegerOption(o => o.setName('minutes').setDescription('Minutes').setRequired(true)),
 
-  new SlashCommandBuilder()
-    .setName('unmute')
-    .setDescription('Remove timeout')
+  new SlashCommandBuilder().setName('unmute').setDescription('Remove timeout')
     .addUserOption(o => o.setName('user').setDescription('User').setRequired(true)),
 
-  new SlashCommandBuilder()
-    .setName('purge')
-    .setDescription('Delete messages')
+  new SlashCommandBuilder().setName('purge').setDescription('Delete messages')
     .addIntegerOption(o => o.setName('amount').setDescription('Amount').setRequired(true)),
 
-  new SlashCommandBuilder()
-    .setName('setlog')
-    .setDescription('Set log channel')
+  new SlashCommandBuilder().setName('setlog').setDescription('Set log channel')
     .addChannelOption(o => o.setName('channel').setDescription('Channel').setRequired(true)),
 
-  new SlashCommandBuilder()
-    .setName('meme')
-    .setDescription('Random meme'),
+  new SlashCommandBuilder().setName('meme').setDescription('Random meme'),
 
-  new SlashCommandBuilder()
-    .setName('coinflip')
-    .setDescription('Flip coin'),
+  new SlashCommandBuilder().setName('coinflip').setDescription('Flip coin'),
 
-  new SlashCommandBuilder()
-    .setName('say')
-    .setDescription('Make bot say something')
+  new SlashCommandBuilder().setName('say').setDescription('Make bot say something')
     .addStringOption(o => o.setName('text').setDescription('Message').setRequired(true)),
 ];
 
-// REGISTER COMMANDS
-const rest = new REST({ version: '10' }).setToken(TOKEN);
-
-(async () => {
-  await rest.put(Routes.applicationCommands(CLIENT_ID), {
-    body: commands.map(cmd => cmd.toJSON())
-  });
-  console.log("Commands loaded");
-})();
-
-// READY
-client.once('ready', () => {
+// ===== REGISTER COMMANDS AFTER READY =====
+client.once('ready', async () => {
   console.log(`Logged in as ${client.user.tag}`);
+
+  const rest = new REST({ version: '10' }).setToken(TOKEN);
+
+  try {
+    await rest.put(Routes.applicationCommands(CLIENT_ID), {
+      body: commands.map(cmd => cmd.toJSON())
+    });
+
+    console.log("Commands loaded globally");
+  } catch (err) {
+    console.error(err);
+  }
 });
 
-// COMMAND HANDLER
+// ===== COMMAND HANDLER =====
 client.on('interactionCreate', async interaction => {
   if (!interaction.isChatInputCommand()) return;
+  if (!interaction.guild) return;
 
   const name = interaction.commandName;
   const member = interaction.member;
@@ -190,9 +164,7 @@ client.on('interactionCreate', async interaction => {
       return interaction.reply(`📌 Logs set to ${channel}`);
     }
 
-    if (name === "ping") {
-      return interaction.reply(`🏓 Pong! ${client.ws.ping}ms`);
-    }
+    if (name === "ping") return interaction.reply(`🏓 Pong! ${client.ws.ping}ms`);
 
     if (name === "avatar") {
       const user = interaction.options.getUser("user") || interaction.user;
@@ -228,7 +200,7 @@ client.on('interactionCreate', async interaction => {
   }
 });
 
-// LOGS
+// ===== LOGS =====
 client.on("messageDelete", msg => {
   const logId = logChannels.get(msg.guild?.id);
   if (!logId) return;
