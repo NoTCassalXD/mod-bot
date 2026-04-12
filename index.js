@@ -24,45 +24,28 @@ const CLIENT_ID = process.env.CLIENT_ID;
 // ===== LOG STORAGE =====
 const logChannels = new Map();
 
-// ===== ALL COMMANDS =====
+// ===== COMMANDS =====
 const commands = [
 
-  // OLD
   new SlashCommandBuilder()
     .setName('kick')
     .setDescription('Kick user')
-    .addUserOption(o => 
-      o.setName('user')
-       .setDescription('User to kick')
-       .setRequired(true)
-    ),
+    .addUserOption(o => o.setName('user').setDescription('User to kick').setRequired(true)),
 
   new SlashCommandBuilder()
     .setName('ban')
     .setDescription('Ban user')
-    .addUserOption(o => 
-      o.setName('user')
-       .setDescription('User to ban')
-       .setRequired(true)
-    ),
+    .addUserOption(o => o.setName('user').setDescription('User to ban').setRequired(true)),
 
   new SlashCommandBuilder()
     .setName('clear')
     .setDescription('Clear messages')
-    .addIntegerOption(o => 
-      o.setName('amount')
-       .setDescription('Number of messages')
-       .setRequired(true)
-    ),
+    .addIntegerOption(o => o.setName('amount').setDescription('Amount').setRequired(true)),
 
   new SlashCommandBuilder()
     .setName('warn')
     .setDescription('Warn user')
-    .addUserOption(o => 
-      o.setName('user')
-       .setDescription('User to warn')
-       .setRequired(true)
-    ),
+    .addUserOption(o => o.setName('user').setDescription('User').setRequired(true)),
 
   new SlashCommandBuilder()
     .setName('ping')
@@ -71,62 +54,33 @@ const commands = [
   new SlashCommandBuilder()
     .setName('avatar')
     .setDescription('Show avatar')
-    .addUserOption(o => 
-      o.setName('user')
-       .setDescription('User (optional)')
-       .setRequired(false)
-    ),
+    .addUserOption(o => o.setName('user').setDescription('User').setRequired(false)),
 
   new SlashCommandBuilder()
     .setName('userinfo')
     .setDescription('User info')
-    .addUserOption(o => 
-      o.setName('user')
-       .setDescription('User (optional)')
-       .setRequired(false)
-    ),
+    .addUserOption(o => o.setName('user').setDescription('User').setRequired(false)),
 
-  // NEW
   new SlashCommandBuilder()
     .setName('mute')
     .setDescription('Timeout user')
-    .addUserOption(o => 
-      o.setName('user')
-       .setDescription('User to mute')
-       .setRequired(true)
-    )
-    .addIntegerOption(o => 
-      o.setName('minutes')
-       .setDescription('Time in minutes')
-       .setRequired(true)
-    ),
+    .addUserOption(o => o.setName('user').setDescription('User').setRequired(true))
+    .addIntegerOption(o => o.setName('minutes').setDescription('Minutes').setRequired(true)),
 
   new SlashCommandBuilder()
     .setName('unmute')
     .setDescription('Remove timeout')
-    .addUserOption(o => 
-      o.setName('user')
-       .setDescription('User to unmute')
-       .setRequired(true)
-    ),
+    .addUserOption(o => o.setName('user').setDescription('User').setRequired(true)),
 
   new SlashCommandBuilder()
     .setName('purge')
     .setDescription('Delete messages')
-    .addIntegerOption(o => 
-      o.setName('amount')
-       .setDescription('Number of messages')
-       .setRequired(true)
-    ),
+    .addIntegerOption(o => o.setName('amount').setDescription('Amount').setRequired(true)),
 
   new SlashCommandBuilder()
     .setName('setlog')
     .setDescription('Set log channel')
-    .addChannelOption(o => 
-      o.setName('channel')
-       .setDescription('Channel for logs')
-       .setRequired(true)
-    ),
+    .addChannelOption(o => o.setName('channel').setDescription('Channel').setRequired(true)),
 
   new SlashCommandBuilder()
     .setName('meme')
@@ -134,7 +88,12 @@ const commands = [
 
   new SlashCommandBuilder()
     .setName('coinflip')
-    .setDescription('Flip coin')
+    .setDescription('Flip coin'),
+
+  new SlashCommandBuilder()
+    .setName('say')
+    .setDescription('Make bot say something')
+    .addStringOption(o => o.setName('text').setDescription('Message').setRequired(true)),
 ];
 
 // REGISTER COMMANDS
@@ -158,101 +117,114 @@ client.on('interactionCreate', async interaction => {
 
   const name = interaction.commandName;
   const member = interaction.member;
-
   const isMod = member.permissions.has(PermissionsBitField.Flags.ModerateMembers);
 
-  if (name === "kick") {
-    if (!isMod) return interaction.reply({ content: "No permission", ephemeral: true });
+  try {
 
-    const user = interaction.options.getUser("user");
-    const target = await interaction.guild.members.fetch(user.id);
-    await target.kick();
-    interaction.reply(`👢 ${user.tag} kicked`);
-  }
+    if (name === "kick") {
+      if (!isMod) return interaction.reply({ content: "No permission", ephemeral: true });
 
-  if (name === "ban") {
-    if (!isMod) return interaction.reply({ content: "No permission", ephemeral: true });
+      const user = interaction.options.getUser("user");
+      const target = await interaction.guild.members.fetch(user.id);
+      await target.kick();
+      return interaction.reply(`👢 ${user.tag} kicked`);
+    }
 
-    const user = interaction.options.getUser("user");
-    const target = await interaction.guild.members.fetch(user.id);
-    await target.ban();
-    interaction.reply(`🔨 ${user.tag} banned`);
-  }
+    if (name === "ban") {
+      if (!isMod) return interaction.reply({ content: "No permission", ephemeral: true });
 
-  if (name === "clear") {
-    if (!isMod) return interaction.reply({ content: "No permission", ephemeral: true });
+      const user = interaction.options.getUser("user");
+      const target = await interaction.guild.members.fetch(user.id);
+      await target.ban();
+      return interaction.reply(`🔨 ${user.tag} banned`);
+    }
 
-    const amount = interaction.options.getInteger("amount");
-    await interaction.channel.bulkDelete(amount, true);
-    interaction.reply({ content: `🗑️ Deleted ${amount}`, ephemeral: true });
-  }
+    if (name === "clear" || name === "purge") {
+      if (!isMod) return interaction.reply({ content: "No permission", ephemeral: true });
 
-  if (name === "warn") {
-    if (!isMod) return interaction.reply({ content: "No permission", ephemeral: true });
+      const amount = interaction.options.getInteger("amount");
+      await interaction.channel.bulkDelete(amount, true);
+      return interaction.reply({ content: `🗑️ Deleted ${amount}`, ephemeral: true });
+    }
 
-    const user = interaction.options.getUser("user");
-    interaction.reply(`⚠️ ${user.tag} warned`);
-  }
+    if (name === "warn") {
+      if (!isMod) return interaction.reply({ content: "No permission", ephemeral: true });
 
-  if (name === "mute") {
-    if (!isMod) return interaction.reply({ content: "No permission", ephemeral: true });
+      const user = interaction.options.getUser("user");
+      return interaction.reply(`⚠️ ${user.tag} warned`);
+    }
 
-    const user = interaction.options.getUser("user");
-    const minutes = interaction.options.getInteger("minutes");
-    const target = await interaction.guild.members.fetch(user.id);
+    if (name === "mute") {
+      if (!isMod) return interaction.reply({ content: "No permission", ephemeral: true });
 
-    await target.timeout(minutes * 60 * 1000);
-    interaction.reply(`🔇 ${user.tag} muted for ${minutes} min`);
-  }
+      await interaction.deferReply();
 
-  if (name === "unmute") {
-    if (!isMod) return interaction.reply({ content: "No permission", ephemeral: true });
+      const user = interaction.options.getUser("user");
+      const minutes = interaction.options.getInteger("minutes");
+      const target = await interaction.guild.members.fetch(user.id);
 
-    const user = interaction.options.getUser("user");
-    const target = await interaction.guild.members.fetch(user.id);
+      await target.timeout(minutes * 60 * 1000);
 
-    await target.timeout(null);
-    interaction.reply(`🔊 ${user.tag} unmuted`);
-  }
+      return interaction.editReply(`🔇 ${user.tag} muted for ${minutes} min`);
+    }
 
-  if (name === "purge") {
-    if (!isMod) return interaction.reply({ content: "No permission", ephemeral: true });
+    if (name === "unmute") {
+      if (!isMod) return interaction.reply({ content: "No permission", ephemeral: true });
 
-    const amount = interaction.options.getInteger("amount");
-    await interaction.channel.bulkDelete(amount, true);
-    interaction.reply({ content: `🧹 Deleted ${amount}`, ephemeral: true });
-  }
+      await interaction.deferReply();
 
-  if (name === "setlog") {
-    if (!isMod) return interaction.reply({ content: "No permission", ephemeral: true });
+      const user = interaction.options.getUser("user");
+      const target = await interaction.guild.members.fetch(user.id);
 
-    const channel = interaction.options.getChannel("channel");
-    logChannels.set(interaction.guild.id, channel.id);
+      await target.timeout(null);
 
-    interaction.reply(`📌 Logs set to ${channel}`);
-  }
+      return interaction.editReply(`🔊 ${user.tag} unmuted`);
+    }
 
-  if (name === "ping") {
-    interaction.reply(`🏓 Pong! ${client.ws.ping}ms`);
-  }
+    if (name === "setlog") {
+      if (!isMod) return interaction.reply({ content: "No permission", ephemeral: true });
 
-  if (name === "avatar") {
-    const user = interaction.options.getUser("user") || interaction.user;
-    interaction.reply(user.displayAvatarURL({ size: 1024 }));
-  }
+      const channel = interaction.options.getChannel("channel");
+      logChannels.set(interaction.guild.id, channel.id);
 
-  if (name === "userinfo") {
-    const user = interaction.options.getUser("user") || interaction.user;
-    interaction.reply(`👤 ${user.tag}\n🆔 ${user.id}`);
-  }
+      return interaction.reply(`📌 Logs set to ${channel}`);
+    }
 
-  if (name === "meme") {
-    const res = await axios.get("https://meme-api.com/gimme");
-    interaction.reply(res.data.url);
-  }
+    if (name === "ping") {
+      return interaction.reply(`🏓 Pong! ${client.ws.ping}ms`);
+    }
 
-  if (name === "coinflip") {
-    interaction.reply(Math.random() < 0.5 ? "Heads 🪙" : "Tails 🪙");
+    if (name === "avatar") {
+      const user = interaction.options.getUser("user") || interaction.user;
+      return interaction.reply(user.displayAvatarURL({ size: 1024 }));
+    }
+
+    if (name === "userinfo") {
+      const user = interaction.options.getUser("user") || interaction.user;
+      return interaction.reply(`👤 ${user.tag}\n🆔 ${user.id}`);
+    }
+
+    if (name === "meme") {
+      const res = await axios.get("https://meme-api.com/gimme");
+      return interaction.reply(res.data.url);
+    }
+
+    if (name === "coinflip") {
+      return interaction.reply(Math.random() < 0.5 ? "Heads 🪙" : "Tails 🪙");
+    }
+
+    if (name === "say") {
+      const text = interaction.options.getString("text");
+      return interaction.reply(text);
+    }
+
+  } catch (err) {
+    console.error(err);
+    if (interaction.deferred || interaction.replied) {
+      interaction.editReply("❌ Error occurred");
+    } else {
+      interaction.reply("❌ Error occurred");
+    }
   }
 });
 
@@ -262,9 +234,7 @@ client.on("messageDelete", msg => {
   if (!logId) return;
 
   const ch = msg.guild.channels.cache.get(logId);
-  if (!ch) return;
-
-  ch.send(`🗑️ Deleted: ${msg.content}`);
+  if (ch) ch.send(`🗑️ Deleted: ${msg.content}`);
 });
 
 client.on("guildBanAdd", ban => {
@@ -272,8 +242,7 @@ client.on("guildBanAdd", ban => {
   if (!logId) return;
 
   const ch = ban.guild.channels.cache.get(logId);
-  ch.send(`🔨 ${ban.user.tag} banned`);
+  if (ch) ch.send(`🔨 ${ban.user.tag} banned`);
 });
-console.log("TOKEN:", process.env.TOKEN);
 
 client.login(TOKEN);
