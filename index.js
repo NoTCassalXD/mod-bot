@@ -6,7 +6,10 @@ const {
   SlashCommandBuilder,
   REST,
   Routes,
-  ChannelType
+  ChannelType,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle
 } = require('discord.js');
 
 const axios = require('axios');
@@ -48,6 +51,9 @@ const commands = [
   new SlashCommandBuilder().setName('userinfo').setDescription('User info')
     .addUserOption(o => o.setName('user').setDescription('User')),
 
+  new SlashCommandBuilder().setName('serverinfo')
+    .setDescription('Show server info'),
+
   new SlashCommandBuilder().setName('mute').setDescription('Timeout user')
     .addUserOption(o => o.setName('user').setDescription('User to mute').setRequired(true))
     .addIntegerOption(o => o.setName('minutes').setDescription('Minutes').setRequired(true)),
@@ -61,8 +67,8 @@ const commands = [
   new SlashCommandBuilder().setName('setlog').setDescription('Set log channel')
     .addChannelOption(o => 
       o.setName('channel')
-       .setDescription('Select a text channel')
        .addChannelTypes(ChannelType.GuildText)
+       .setDescription('Select log channel')
        .setRequired(true)
     ),
 
@@ -72,181 +78,124 @@ const commands = [
 
   new SlashCommandBuilder().setName('say').setDescription('Make bot say something')
     .addStringOption(o => o.setName('text').setDescription('Message').setRequired(true)),
+
+  new SlashCommandBuilder()
+    .setName('reactionrole')
+    .setDescription('Create role button')
+    .addRoleOption(o =>
+      o.setName('role')
+       .setDescription('Role to give')
+       .setRequired(true)
+    )
+    .addStringOption(o =>
+      o.setName('label')
+       .setDescription('Button text')
+       .setRequired(true)
+    ),
 ];
 
-// ===== REGISTER COMMANDS =====
+// ===== REGISTER COMMANDS (INSTANT) =====
 client.once('ready', async () => {
   console.log(`Logged in as ${client.user.tag}`);
 
   const rest = new REST({ version: '10' }).setToken(TOKEN);
 
   try {
-    await rest.put(Routes.applicationCommands(CLIENT_ID), {
-      body: commands.map(cmd => cmd.toJSON())
-    });
+    // 🧹 clear old broken commands
+    await rest.put(
+      Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID),
+      { body: [] }
+    );
 
-    console.log("✅ Commands loaded (global)");
+    // ✅ load fresh commands
+    await rest.put(
+      Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID),
+      { body: commands.map(cmd => cmd.toJSON()) }
+    );
+
+    console.log("✅ Commands loaded instantly");
   } catch (err) {
     console.error(err);
   }
 });
 
-// ===== COMMAND HANDLER =====
+// ===== INTERACTIONS =====
 client.on('interactionCreate', async interaction => {
+
+  // BUTTONS (REACTION ROLE)
+  if (interaction.isButton()) {
+    const roleId = interaction.customId.split("_")[1];
+    const role = interaction.guild.roles.cache.get(roleId);
+
+    if (!role) return interaction.reply({ content: "Role not found", ephemeral: true });
+
+    if (interaction.member.roles.cache.has(roleId)) {
+      await interaction.member.roles.remove(roleId);
+      return interaction.reply({ content: `❌ Removed ${role.name}`, ephemeral: true });
+    } else {
+      await interaction.member.roles.add(roleId);
+      return interaction.reply({ content: `✅ Added ${role.name}`, ephemeral: true });
+    }
+  }
+
   if (!interaction.isChatInputCommand()) return;
-  if (!interaction.guild) return;
 
   const name = interaction.commandName;
-  const member = interaction.member;
-  const isMod = member.permissions.has(PermissionsBitField.Flags.ModerateMembers);
+  const isMod = interaction.member.permissions.has(PermissionsBitField.Flags.ModerateMembers);
 
   try {
 
-    if (name === "kick") {
-      if (!isMod) return interaction.reply({ content: "No permission", ephemeral: true });
+    if (name === "reactionrole") {
+      const role = interaction.options.getRole("role");
+      const label = interaction.options.getString("label");
 
-      const user = interaction.options.getUser("user");
-      const target = await interaction.guild.members.fetch(user.id);
+      const btn = new ButtonBuilder()
+        .setCustomId(`rr_${role.id}`)
+        .setLabel(label)
+        .setStyle(ButtonStyle.Primary);
 
-      if (!target.kickable) return interaction.reply("❌ Cannot kick this user");
-
-      await target.kick();
-      return interaction.reply(`👢 ${user.tag} kicked`);
+      return interaction.reply({
+        content: "Click button to get/remove role:",
+        components: [new ActionRowBuilder().addComponents(btn)]
+      });
     }
 
-    if (name === "ban") {
-      if (!isMod) return interaction.reply({ content: "No permission", ephemeral: true });
+    if (name === "serverinfo") {
+      const g = interaction.guild;
 
-      const user = interaction.options.getUser("user");
-      const target = await interaction.guild.members.fetch(user.id);
-
-      if (!target.bannable) return interaction.reply("❌ Cannot ban this user");
-
-      await target.ban();
-      return interaction.reply(`🔨 ${user.tag} banned`);
+      return interaction.reply({
+        embeds: [{
+          color: 0x5865F2,
+          title: `📊 ${g.name}`,
+          thumbnail: { url: g.iconURL() },
+          fields: [
+            { name: "👑 Owner", value: `<@${g.ownerId}>`, inline: true },
+            { name: "👥 Members", value: `${g.memberCount}`, inline: true },
+            { name: "📺 Channels", value: `${g.channels.cache.size}`, inline: true },
+            { name: "🎭 Roles", value: `${g.roles.cache.size}`, inline: true },
+            { name: "🚀 Boosts", value: `${g.premiumSubscriptionCount}`, inline: true },
+            { name: "🆔 ID", value: g.id }
+          ]
+        }]
+      });
     }
 
-    if (name === "clear" || name === "purge") {
-      if (!isMod) return interaction.reply({ content: "No permission", ephemeral: true });
-
-      const amount = interaction.options.getInteger("amount");
-
-      await interaction.channel.bulkDelete(amount, true);
-      return interaction.reply({ content: `🗑️ Deleted ${amount}`, ephemeral: true });
-    }
-
-    if (name === "warn") {
-      const user = interaction.options.getUser("user");
-      return interaction.reply(`⚠️ ${user.tag} warned`);
-    }
-
-    if (name === "mute") {
-      if (!isMod) return interaction.reply({ content: "No permission", ephemeral: true });
-
-      await interaction.deferReply();
-
-      const user = interaction.options.getUser("user");
-      const minutes = interaction.options.getInteger("minutes");
-      const target = await interaction.guild.members.fetch(user.id);
-
-      if (!target.moderatable) return interaction.editReply("❌ Cannot mute this user");
-
-      await target.timeout(minutes * 60000);
-
-      return interaction.editReply(`🔇 ${user.tag} muted for ${minutes} min`);
-    }
-
-    if (name === "unmute") {
-      if (!isMod) return interaction.reply({ content: "No permission", ephemeral: true });
-
-      await interaction.deferReply();
-
-      const user = interaction.options.getUser("user");
-      const target = await interaction.guild.members.fetch(user.id);
-
-      if (!target.moderatable) return interaction.editReply("❌ Cannot unmute this user");
-
-      await target.timeout(null);
-
-      return interaction.editReply(`🔊 ${user.tag} unmuted`);
-    }
-
-    if (name === "setlog") {
-      if (!isMod) return interaction.reply({ content: "No permission", ephemeral: true });
-
-      const channel = interaction.options.getChannel("channel");
-
-      logChannels.set(interaction.guild.id, channel.id);
-
-      return interaction.reply(`📌 Logs set to ${channel}`);
+    if (name === "say") {
+      return interaction.reply(interaction.options.getString("text"));
     }
 
     if (name === "ping") return interaction.reply(`🏓 ${client.ws.ping}ms`);
 
-    if (name === "avatar") {
-      const user = interaction.options.getUser("user") || interaction.user;
-      return interaction.reply(user.displayAvatarURL({ size: 1024 }));
-    }
-
-    if (name === "userinfo") {
-      const user = interaction.options.getUser("user") || interaction.user;
-      return interaction.reply(`👤 ${user.tag}\n🆔 ${user.id}`);
-    }
+    if (name === "coinflip") return interaction.reply(Math.random() < 0.5 ? "Heads 🪙" : "Tails 🪙");
 
     if (name === "meme") {
       const res = await axios.get("https://meme-api.com/gimme");
       return interaction.reply(res.data.url);
     }
 
-    if (name === "coinflip") {
-      return interaction.reply(Math.random() < 0.5 ? "Heads 🪙" : "Tails 🪙");
-    }
-
-    if (name === "say") {
-      const text = interaction.options.getString("text");
-      return interaction.reply(text);
-    }
-
   } catch (err) {
     console.error(err);
-    if (interaction.deferred || interaction.replied) {
-      interaction.editReply("❌ Error occurred");
-    } else {
-      interaction.reply("❌ Error occurred");
-    }
-  }
-});
-
-// ===== LOG SYSTEM (FIXED) =====
-client.on("messageDelete", async msg => {
-  if (!msg.guild) return;
-
-  const logId = logChannels.get(msg.guild.id);
-  if (!logId) return;
-
-  const ch = msg.guild.channels.cache.get(logId);
-  if (!ch) return;
-
-  try {
-    await ch.send(`🗑️ ${msg.author?.tag || "Unknown"}: ${msg.content || "No text"}`);
-  } catch (err) {
-    console.error("Log error:", err);
-  }
-});
-
-client.on("guildBanAdd", async ban => {
-  if (!ban.guild) return;
-
-  const logId = logChannels.get(ban.guild.id);
-  if (!logId) return;
-
-  const ch = ban.guild.channels.cache.get(logId);
-  if (!ch) return;
-
-  try {
-    await ch.send(`🔨 ${ban.user.tag} banned`);
-  } catch (err) {
-    console.error("Ban log error:", err);
+    interaction.reply("❌ Error");
   }
 });
 
