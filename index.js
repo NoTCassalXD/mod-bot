@@ -1,15 +1,11 @@
 require('dotenv').config();
-const { 
-  Client, 
-  GatewayIntentBits, 
+const {
+  Client,
+  GatewayIntentBits,
   PermissionsBitField,
   SlashCommandBuilder,
   REST,
   Routes,
-  ChannelType,
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle
 } = require('discord.js');
 
 const axios = require('axios');
@@ -25,177 +21,246 @@ const client = new Client({
 
 const TOKEN = process.env.TOKEN;
 const CLIENT_ID = process.env.CLIENT_ID;
+const GUILD_ID = process.env.GUILD_ID; // Make sure to add GUILD_ID to your .env file!
 
-const logChannels = new Map();
-
-// ===== COMMANDS =====
-const commands = [
-
-  new SlashCommandBuilder().setName('kick').setDescription('Kick user')
-    .addUserOption(o => o.setName('user').setDescription('User to kick').setRequired(true)),
-
-  new SlashCommandBuilder().setName('ban').setDescription('Ban user')
-    .addUserOption(o => o.setName('user').setDescription('User to ban').setRequired(true)),
-
-  new SlashCommandBuilder().setName('clear').setDescription('Clear messages')
-    .addIntegerOption(o => o.setName('amount').setDescription('Amount').setRequired(true)),
-
-  new SlashCommandBuilder().setName('warn').setDescription('Warn user')
-    .addUserOption(o => o.setName('user').setDescription('User to warn').setRequired(true)),
-
+// ===== MEMBER COMMANDS (everyone can use) =====
+const memberCommands = [
   new SlashCommandBuilder().setName('ping').setDescription('Check latency'),
 
-  new SlashCommandBuilder().setName('avatar').setDescription('Show avatar')
-    .addUserOption(o => o.setName('user').setDescription('User')),
+  new SlashCommandBuilder().setName('avatar').setDescription('Show a user\'s avatar')
+    .addUserOption(o => o.setName('user').setDescription('User (leave empty for yourself)')),
 
-  new SlashCommandBuilder().setName('userinfo').setDescription('User info')
-    .addUserOption(o => o.setName('user').setDescription('User')),
+  new SlashCommandBuilder().setName('userinfo').setDescription('Show info about a user')
+    .addUserOption(o => o.setName('user').setDescription('User (leave empty for yourself)')),
 
-  new SlashCommandBuilder().setName('serverinfo')
-    .setDescription('Show server info'),
+  new SlashCommandBuilder().setName('serverinfo').setDescription('Show server info'),
 
-  new SlashCommandBuilder().setName('mute').setDescription('Timeout user')
-    .addUserOption(o => o.setName('user').setDescription('User to mute').setRequired(true))
-    .addIntegerOption(o => o.setName('minutes').setDescription('Minutes').setRequired(true)),
-
-  new SlashCommandBuilder().setName('unmute').setDescription('Remove timeout')
-    .addUserOption(o => o.setName('user').setDescription('User to unmute').setRequired(true)),
-
-  new SlashCommandBuilder().setName('purge').setDescription('Delete messages')
-    .addIntegerOption(o => o.setName('amount').setDescription('Amount').setRequired(true)),
-
-  new SlashCommandBuilder().setName('setlog').setDescription('Set log channel')
-    .addChannelOption(o => 
-      o.setName('channel')
-       .addChannelTypes(ChannelType.GuildText)
-       .setDescription('Select log channel')
-       .setRequired(true)
-    ),
-
-  new SlashCommandBuilder().setName('meme').setDescription('Random meme'),
+  new SlashCommandBuilder().setName('meme').setDescription('Get a random meme'),
 
   new SlashCommandBuilder().setName('coinflip').setDescription('Flip a coin'),
 
-  new SlashCommandBuilder().setName('say').setDescription('Make bot say something')
-    .addStringOption(o => o.setName('text').setDescription('Message').setRequired(true)),
-
-  new SlashCommandBuilder()
-    .setName('reactionrole')
-    .setDescription('Create role button')
-    .addRoleOption(o =>
-      o.setName('role')
-       .setDescription('Role to give')
-       .setRequired(true)
-    )
-    .addStringOption(o =>
-      o.setName('label')
-       .setDescription('Button text')
-       .setRequired(true)
-    ),
+  new SlashCommandBuilder().setName('say').setDescription('Make the bot say something')
+    .addStringOption(o => o.setName('text').setDescription('Message to send').setRequired(true)),
 ];
 
-// ===== REGISTER COMMANDS (INSTANT) =====
+// ===== ADMIN COMMANDS (admin/owner only) =====
+const adminCommands = [
+  new SlashCommandBuilder().setName('kick').setDescription('[ADMIN] Kick a user')
+    .setDefaultMemberPermissions(PermissionsBitField.Flags.KickMembers)
+    .addUserOption(o => o.setName('user').setDescription('User to kick').setRequired(true))
+    .addStringOption(o => o.setName('reason').setDescription('Reason')),
+
+  new SlashCommandBuilder().setName('ban').setDescription('[ADMIN] Ban a user')
+    .setDefaultMemberPermissions(PermissionsBitField.Flags.BanMembers)
+    .addUserOption(o => o.setName('user').setDescription('User to ban').setRequired(true))
+    .addStringOption(o => o.setName('reason').setDescription('Reason')),
+
+  new SlashCommandBuilder().setName('warn').setDescription('[ADMIN] Warn a user')
+    .setDefaultMemberPermissions(PermissionsBitField.Flags.ModerateMembers)
+    .addUserOption(o => o.setName('user').setDescription('User to warn').setRequired(true))
+    .addStringOption(o => o.setName('reason').setDescription('Reason')),
+
+  new SlashCommandBuilder().setName('mute').setDescription('[ADMIN] Timeout a user')
+    .setDefaultMemberPermissions(PermissionsBitField.Flags.ModerateMembers)
+    .addUserOption(o => o.setName('user').setDescription('User to mute').setRequired(true))
+    .addIntegerOption(o => o.setName('minutes').setDescription('Duration in minutes').setRequired(true)),
+
+  new SlashCommandBuilder().setName('unmute').setDescription('[ADMIN] Remove timeout from a user')
+    .setDefaultMemberPermissions(PermissionsBitField.Flags.ModerateMembers)
+    .addUserOption(o => o.setName('user').setDescription('User to unmute').setRequired(true)),
+
+  new SlashCommandBuilder().setName('clear').setDescription('[ADMIN] Clear messages (1-100)')
+    .setDefaultMemberPermissions(PermissionsBitField.Flags.ManageMessages)
+    .addIntegerOption(o => o.setName('amount').setDescription('Number of messages').setRequired(true)),
+
+  new SlashCommandBuilder().setName('purge').setDescription('[ADMIN] Delete messages (1-100)')
+    .setDefaultMemberPermissions(PermissionsBitField.Flags.ManageMessages)
+    .addIntegerOption(o => o.setName('amount').setDescription('Number of messages').setRequired(true)),
+];
+
+const allCommands = [...memberCommands, ...adminCommands];
+
+// ===== REGISTER COMMANDS =====
 client.once('ready', async () => {
-  console.log(`Logged in as ${client.user.tag}`);
+  console.log(`✅ Logged in as ${client.user.tag}`);
 
   const rest = new REST({ version: '10' }).setToken(TOKEN);
 
   try {
-    // 🧹 clear old broken commands
+    // Clear old commands first
     await rest.put(
       Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID),
       { body: [] }
     );
 
-    // ✅ load fresh commands
+    // Register all fresh commands
     await rest.put(
       Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID),
-      { body: commands.map(cmd => cmd.toJSON()) }
+      { body: allCommands.map(cmd => cmd.toJSON()) }
     );
 
-    console.log("✅ Commands loaded instantly");
+    console.log("✅ All commands registered successfully!");
   } catch (err) {
-    console.error(err);
+    console.error("❌ Failed to register commands:", err);
   }
 });
 
+// ===== PERMISSION HELPER =====
+function isAdminOrOwner(interaction) {
+  const member = interaction.member;
+  const isOwner = interaction.guild.ownerId === member.id;
+  const isAdmin = member.permissions.has(PermissionsBitField.Flags.Administrator);
+  const canModerate = member.permissions.has(PermissionsBitField.Flags.ModerateMembers);
+  const canKick = member.permissions.has(PermissionsBitField.Flags.KickMembers);
+  const canBan = member.permissions.has(PermissionsBitField.Flags.BanMembers);
+  const canManageMessages = member.permissions.has(PermissionsBitField.Flags.ManageMessages);
+  return isOwner || isAdmin || canModerate || canKick || canBan || canManageMessages;
+}
+
+const ADMIN_COMMANDS = ['kick', 'ban', 'warn', 'mute', 'unmute', 'clear', 'purge'];
+
 // ===== INTERACTIONS =====
 client.on('interactionCreate', async interaction => {
-
-  // BUTTONS (REACTION ROLE)
-  if (interaction.isButton()) {
-    const roleId = interaction.customId.split("_")[1];
-    const role = interaction.guild.roles.cache.get(roleId);
-
-    if (!role) return interaction.reply({ content: "Role not found", ephemeral: true });
-
-    if (interaction.member.roles.cache.has(roleId)) {
-      await interaction.member.roles.remove(roleId);
-      return interaction.reply({ content: `❌ Removed ${role.name}`, ephemeral: true });
-    } else {
-      await interaction.member.roles.add(roleId);
-      return interaction.reply({ content: `✅ Added ${role.name}`, ephemeral: true });
-    }
-  }
-
   if (!interaction.isChatInputCommand()) return;
 
   const name = interaction.commandName;
-  const isMod = interaction.member.permissions.has(PermissionsBitField.Flags.ModerateMembers);
+
+  // Double-check: block admin commands if user has no perms (extra safety net)
+  if (ADMIN_COMMANDS.includes(name) && !isAdminOrOwner(interaction)) {
+    return interaction.reply({
+      content: "🚫 You don't have permission to use this command.",
+      ephemeral: true
+    });
+  }
 
   try {
 
-    if (name === "reactionrole") {
-      const role = interaction.options.getRole("role");
-      const label = interaction.options.getString("label");
+    // ===== MEMBER COMMANDS =====
 
-      const btn = new ButtonBuilder()
-        .setCustomId(`rr_${role.id}`)
-        .setLabel(label)
-        .setStyle(ButtonStyle.Primary);
+    if (name === 'ping') {
+      return interaction.reply(`🏓 Pong! Latency: **${client.ws.ping}ms**`);
+    }
 
+    if (name === 'coinflip') {
+      const result = Math.random() < 0.5 ? '🪙 Heads!' : '🪙 Tails!';
+      return interaction.reply(result);
+    }
+
+    if (name === 'say') {
+      const text = interaction.options.getString('text');
+      return interaction.reply(text);
+    }
+
+    if (name === 'meme') {
+      const res = await axios.get('https://meme-api.com/gimme');
+      return interaction.reply({ content: res.data.url });
+    }
+
+    if (name === 'avatar') {
+      const target = interaction.options.getUser('user') || interaction.user;
       return interaction.reply({
-        content: "Click button to get/remove role:",
-        components: [new ActionRowBuilder().addComponents(btn)]
+        embeds: [{
+          color: 0x5865F2,
+          title: `🖼️ ${target.username}'s Avatar`,
+          image: { url: target.displayAvatarURL({ size: 512 }) }
+        }]
       });
     }
 
-    if (name === "serverinfo") {
-      const g = interaction.guild;
+    if (name === 'userinfo') {
+      const target = interaction.options.getUser('user') || interaction.user;
+      const member = interaction.guild.members.cache.get(target.id);
+      return interaction.reply({
+        embeds: [{
+          color: 0x5865F2,
+          title: `👤 ${target.username}`,
+          thumbnail: { url: target.displayAvatarURL() },
+          fields: [
+            { name: '🆔 User ID', value: target.id, inline: true },
+            { name: '🤖 Bot?', value: target.bot ? 'Yes' : 'No', inline: true },
+            { name: '📅 Account Created', value: `<t:${Math.floor(target.createdTimestamp / 1000)}:D>`, inline: true },
+            { name: '📥 Joined Server', value: member ? `<t:${Math.floor(member.joinedTimestamp / 1000)}:D>` : 'Unknown', inline: true },
+          ]
+        }]
+      });
+    }
 
+    if (name === 'serverinfo') {
+      const g = interaction.guild;
       return interaction.reply({
         embeds: [{
           color: 0x5865F2,
           title: `📊 ${g.name}`,
           thumbnail: { url: g.iconURL() },
           fields: [
-            { name: "👑 Owner", value: `<@${g.ownerId}>`, inline: true },
-            { name: "👥 Members", value: `${g.memberCount}`, inline: true },
-            { name: "📺 Channels", value: `${g.channels.cache.size}`, inline: true },
-            { name: "🎭 Roles", value: `${g.roles.cache.size}`, inline: true },
-            { name: "🚀 Boosts", value: `${g.premiumSubscriptionCount}`, inline: true },
-            { name: "🆔 ID", value: g.id }
+            { name: '👑 Owner', value: `<@${g.ownerId}>`, inline: true },
+            { name: '👥 Members', value: `${g.memberCount}`, inline: true },
+            { name: '📺 Channels', value: `${g.channels.cache.size}`, inline: true },
+            { name: '🎭 Roles', value: `${g.roles.cache.size}`, inline: true },
+            { name: '🚀 Boosts', value: `${g.premiumSubscriptionCount ?? 0}`, inline: true },
+            { name: '🆔 Server ID', value: g.id }
           ]
         }]
       });
     }
 
-    if (name === "say") {
-      return interaction.reply(interaction.options.getString("text"));
+    // ===== ADMIN COMMANDS =====
+
+    if (name === 'kick') {
+      const target = interaction.options.getMember('user');
+      const reason = interaction.options.getString('reason') || 'No reason provided';
+      if (!target) return interaction.reply({ content: '❌ User not found.', ephemeral: true });
+      if (!target.kickable) return interaction.reply({ content: '❌ I cannot kick this user.', ephemeral: true });
+      await target.kick(reason);
+      return interaction.reply({ embeds: [{ color: 0xFF5555, title: '👢 User Kicked', fields: [{ name: 'User', value: `${target.user.tag}`, inline: true }, { name: 'Reason', value: reason, inline: true }] }] });
     }
 
-    if (name === "ping") return interaction.reply(`🏓 ${client.ws.ping}ms`);
+    if (name === 'ban') {
+      const target = interaction.options.getMember('user');
+      const reason = interaction.options.getString('reason') || 'No reason provided';
+      if (!target) return interaction.reply({ content: '❌ User not found.', ephemeral: true });
+      if (!target.bannable) return interaction.reply({ content: '❌ I cannot ban this user.', ephemeral: true });
+      await target.ban({ reason });
+      return interaction.reply({ embeds: [{ color: 0xFF0000, title: '🔨 User Banned', fields: [{ name: 'User', value: `${target.user.tag}`, inline: true }, { name: 'Reason', value: reason, inline: true }] }] });
+    }
 
-    if (name === "coinflip") return interaction.reply(Math.random() < 0.5 ? "Heads 🪙" : "Tails 🪙");
+    if (name === 'warn') {
+      const target = interaction.options.getUser('user');
+      const reason = interaction.options.getString('reason') || 'No reason provided';
+      if (!target) return interaction.reply({ content: '❌ User not found.', ephemeral: true });
+      return interaction.reply({ embeds: [{ color: 0xFFAA00, title: '⚠️ User Warned', fields: [{ name: 'User', value: `${target.tag}`, inline: true }, { name: 'Reason', value: reason, inline: true }] }] });
+    }
 
-    if (name === "meme") {
-      const res = await axios.get("https://meme-api.com/gimme");
-      return interaction.reply(res.data.url);
+    if (name === 'mute') {
+      const target = interaction.options.getMember('user');
+      const minutes = interaction.options.getInteger('minutes');
+      if (!target) return interaction.reply({ content: '❌ User not found.', ephemeral: true });
+      if (!target.moderatable) return interaction.reply({ content: '❌ I cannot mute this user.', ephemeral: true });
+      await target.timeout(minutes * 60 * 1000, `Muted by ${interaction.user.tag}`);
+      return interaction.reply({ embeds: [{ color: 0xFFAA00, title: '🔇 User Muted', fields: [{ name: 'User', value: `${target.user.tag}`, inline: true }, { name: 'Duration', value: `${minutes} minute(s)`, inline: true }] }] });
+    }
+
+    if (name === 'unmute') {
+      const target = interaction.options.getMember('user');
+      if (!target) return interaction.reply({ content: '❌ User not found.', ephemeral: true });
+      await target.timeout(null);
+      return interaction.reply({ embeds: [{ color: 0x57F287, title: '🔊 User Unmuted', fields: [{ name: 'User', value: `${target.user.tag}` }] }] });
+    }
+
+    if (name === 'clear' || name === 'purge') {
+      const amount = interaction.options.getInteger('amount');
+      if (amount < 1 || amount > 100) {
+        return interaction.reply({ content: '❌ Amount must be between 1 and 100.', ephemeral: true });
+      }
+      await interaction.channel.bulkDelete(amount, true);
+      return interaction.reply({ content: `🗑️ Deleted **${amount}** message(s).`, ephemeral: true });
     }
 
   } catch (err) {
-    console.error(err);
-    interaction.reply("❌ Error");
+    console.error('❌ Command error:', err);
+    if (!interaction.replied) {
+      interaction.reply({ content: '❌ Something went wrong.', ephemeral: true });
+    }
   }
 });
 
