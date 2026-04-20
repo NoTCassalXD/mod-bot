@@ -54,6 +54,11 @@ const memberCommands = [
     .setName('say')
     .setDescription('Make the bot say something')
     .addStringOption(o => o.setName('text').setDescription('Message to send').setRequired(true)),
+
+  new SlashCommandBuilder()
+    .setName('gay')
+    .setDescription('Check how gay someone is 🏳️‍🌈')
+    .addUserOption(o => o.setName('user').setDescription('User (leave empty for yourself)')),
 ];
 
 // ===== ADMIN COMMANDS (admin/owner only) =====
@@ -217,6 +222,28 @@ client.on('interactionCreate', async interaction => {
             { name: '🚀 Boosts', value: `${g.premiumSubscriptionCount ?? 0}`, inline: true },
             { name: '🆔 Server ID', value: g.id }
           ]
+        }]
+      });
+    }
+
+    if (name === 'gay') {
+      const target = interaction.options.getUser('user') || interaction.user;
+      const percentage = Math.floor(Math.random() * 101);
+      let emoji = '🏳️‍🌈';
+      let message = '';
+
+      if (percentage <= 20) message = 'Totally straight!';
+      else if (percentage <= 40) message = 'Just a little fruity 🍓';
+      else if (percentage <= 60) message = 'Somewhere in the middle 👀';
+      else if (percentage <= 80) message = 'Pretty gay ngl 😳';
+      else message = 'MAXIMUM RAINBOW ENERGY 🌈';
+
+      return interaction.reply({
+        embeds: [{
+          color: 0xFF69B4,
+          title: `${emoji} Gay Meter`,
+          description: `**${target.username}** is **${percentage}% gay!**\n\n${message}`,
+          thumbnail: { url: target.displayAvatarURL({ size: 256 }) }
         }]
       });
     }
