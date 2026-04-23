@@ -22,7 +22,61 @@ const client = new Client({
 const TOKEN = process.env.TOKEN;
 const CLIENT_ID = process.env.CLIENT_ID;
 
-// ===== MEMBER COMMANDS (everyone can use) =====
+// ===== GENSHIN CHARACTERS =====
+const genshinCharacters = [
+  { name: 'Neuvillette', stars: 5, element: 'Hydro', icon: '💧' },
+  { name: 'Furina', stars: 5, element: 'Hydro', icon: '💧' },
+  { name: 'Zhongli', stars: 5, element: 'Geo', icon: '🪨' },
+  { name: 'Raiden Shogun', stars: 5, element: 'Electro', icon: '⚡' },
+  { name: 'Kazuha', stars: 5, element: 'Anemo', icon: '🌀' },
+  { name: 'Hu Tao', stars: 5, element: 'Pyro', icon: '🔥' },
+  { name: 'Ganyu', stars: 5, element: 'Cryo', icon: '❄️' },
+  { name: 'Nahida', stars: 5, element: 'Dendro', icon: '🌿' },
+  { name: 'Yelan', stars: 5, element: 'Hydro', icon: '💧' },
+  { name: 'Xiao', stars: 5, element: 'Anemo', icon: '🌀' },
+  { name: 'Arlecchino', stars: 5, element: 'Pyro', icon: '🔥' },
+  { name: 'Navia', stars: 5, element: 'Geo', icon: '🪨' },
+  { name: 'Clorinde', stars: 5, element: 'Electro', icon: '⚡' },
+  { name: 'Wriothesley', stars: 5, element: 'Cryo', icon: '❄️' },
+  { name: 'Lyney', stars: 5, element: 'Pyro', icon: '🔥' },
+  { name: 'Wanderer', stars: 5, element: 'Anemo', icon: '🌀' },
+  { name: 'Cyno', stars: 5, element: 'Electro', icon: '⚡' },
+  { name: 'Nilou', stars: 5, element: 'Hydro', icon: '💧' },
+  { name: 'Tighnari', stars: 5, element: 'Dendro', icon: '🌿' },
+  { name: 'Ayaka', stars: 5, element: 'Cryo', icon: '❄️' },
+  { name: 'Ayato', stars: 5, element: 'Hydro', icon: '💧' },
+  { name: 'Itto', stars: 5, element: 'Geo', icon: '🪨' },
+  { name: 'Eula', stars: 5, element: 'Cryo', icon: '❄️' },
+  { name: 'Albedo', stars: 5, element: 'Geo', icon: '🪨' },
+  { name: 'Venti', stars: 5, element: 'Anemo', icon: '🌀' },
+  { name: 'Noelle', stars: 4, element: 'Geo', icon: '🪨' },
+  { name: 'Bennett', stars: 4, element: 'Pyro', icon: '🔥' },
+  { name: 'Xingqiu', stars: 4, element: 'Hydro', icon: '💧' },
+  { name: 'Fischl', stars: 4, element: 'Electro', icon: '⚡' },
+  { name: 'Xiangling', stars: 4, element: 'Pyro', icon: '🔥' },
+  { name: 'Sucrose', stars: 4, element: 'Anemo', icon: '🌀' },
+  { name: 'Beidou', stars: 4, element: 'Electro', icon: '⚡' },
+  { name: 'Razor', stars: 4, element: 'Electro', icon: '⚡' },
+  { name: 'Chongyun', stars: 4, element: 'Cryo', icon: '❄️' },
+  { name: 'Rosaria', stars: 4, element: 'Cryo', icon: '❄️' },
+];
+
+const roasts = [
+  "Your Wi-Fi password is probably 'password123' isn't it? 😂",
+  "You look like you AFK in the overworld for 3 hours and call it 'exploring' 💀",
+  "I've seen slimes with better aim than you 🎯",
+  "You're the type to build full ATK on a healer 😭",
+  "Even Paimon roams more than you do 🧚",
+  "You still haven't cleared Spiral Abyss floor 9, huh? No worries 👀",
+  "Your fashion sense makes Childe's outfits look stylish 💅",
+  "You're so average even the Traveler has more lore than you 😅",
+  "I heard you use Barbara as your main DPS. Respect... I guess 🫡",
+  "You probably skip all the story cutscenes and then ask what's happening 🤦",
+  "Your team comp is so bad even the hilichurls feel bad for you 🏕️",
+  "You're the type to run out of resin and then complain there's nothing to do 😆",
+];
+
+// ===== MEMBER COMMANDS =====
 const memberCommands = [
   new SlashCommandBuilder()
     .setName('ping')
@@ -59,9 +113,33 @@ const memberCommands = [
     .setName('gay')
     .setDescription('Check how gay someone is 🏳️‍🌈')
     .addUserOption(o => o.setName('user').setDescription('User (leave empty for yourself)')),
+
+  new SlashCommandBuilder()
+    .setName('sus')
+    .setDescription('Check how sus someone is 🔴')
+    .addUserOption(o => o.setName('user').setDescription('User (leave empty for yourself)')),
+
+  new SlashCommandBuilder()
+    .setName('love')
+    .setDescription('Check love compatibility between two users ❤️')
+    .addUserOption(o => o.setName('user1').setDescription('First user').setRequired(true))
+    .addUserOption(o => o.setName('user2').setDescription('Second user').setRequired(true)),
+
+  new SlashCommandBuilder()
+    .setName('roast')
+    .setDescription('Roast someone 🔥')
+    .addUserOption(o => o.setName('user').setDescription('User to roast').setRequired(true)),
+
+  new SlashCommandBuilder()
+    .setName('pull')
+    .setDescription('Pull a random Genshin Impact character ✨'),
+
+  new SlashCommandBuilder()
+    .setName('main')
+    .setDescription('See what Genshin character you main 🎮'),
 ];
 
-// ===== ADMIN COMMANDS (admin/owner only) =====
+// ===== ADMIN COMMANDS =====
 const adminCommands = [
   new SlashCommandBuilder()
     .setName('kick')
@@ -120,12 +198,7 @@ client.once('ready', async () => {
 
   try {
     console.log('⏳ Registering commands globally...');
-
-    await rest.put(
-      Routes.applicationCommands(CLIENT_ID),
-      { body: allCommands }
-    );
-
+    await rest.put(Routes.applicationCommands(CLIENT_ID), { body: allCommands });
     console.log(`✅ Successfully registered ${allCommands.length} commands globally!`);
   } catch (err) {
     console.error('❌ Failed to register commands:', err);
@@ -229,24 +302,119 @@ client.on('interactionCreate', async interaction => {
     if (name === 'gay') {
       const target = interaction.options.getUser('user') || interaction.user;
       const percentage = Math.floor(Math.random() * 101);
-      let emoji = '🏳️‍🌈';
       let message = '';
-
       if (percentage <= 20) message = 'Totally straight!';
       else if (percentage <= 40) message = 'Just a little fruity 🍓';
       else if (percentage <= 60) message = 'Somewhere in the middle 👀';
       else if (percentage <= 80) message = 'Pretty gay ngl 😳';
       else message = 'MAXIMUM RAINBOW ENERGY 🌈';
-
       return interaction.reply({
         embeds: [{
           color: 0xFF69B4,
-          title: `${emoji} Gay Meter`,
+          title: `🏳️‍🌈 Gay Meter`,
           description: `**${target.username}** is **${percentage}% gay!**\n\n${message}`,
           thumbnail: { url: target.displayAvatarURL({ size: 256 }) }
         }]
       });
     }
+
+    if (name === 'sus') {
+      const target = interaction.options.getUser('user') || interaction.user;
+      const percentage = Math.floor(Math.random() * 101);
+      let message = '';
+      let color = 0xFF0000;
+      if (percentage <= 20) { message = 'Probably innocent... probably. 🟢'; color = 0x57F287; }
+      else if (percentage <= 40) { message = 'A little sus but nothing major 🟡'; color = 0xFFFF00; }
+      else if (percentage <= 60) { message = 'Kinda sus ngl... 🟠'; color = 0xFFAA00; }
+      else if (percentage <= 80) { message = 'Very sus! I\'m voting them out 🔴'; color = 0xFF5555; }
+      else { message = 'MEGA SUS! 100% the impostor 📮'; color = 0xFF0000; }
+      return interaction.reply({
+        embeds: [{
+          color,
+          title: `🔴 Sus Meter`,
+          description: `**${target.username}** is **${percentage}% sus!**\n\n${message}`,
+          thumbnail: { url: target.displayAvatarURL({ size: 256 }) },
+          footer: { text: 'Emergency meeting called!' }
+        }]
+      });
+    }
+
+    if (name === 'love') {
+      const user1 = interaction.options.getUser('user1');
+      const user2 = interaction.options.getUser('user2');
+      const percentage = Math.floor(Math.random() * 101);
+      let message = '';
+      let color = 0xFF69B4;
+      if (percentage <= 20) { message = 'Yikes... not a great match 💔'; color = 0x808080; }
+      else if (percentage <= 40) { message = 'Could work with some effort 🤔'; color = 0xFFAA00; }
+      else if (percentage <= 60) { message = 'A decent match! 💛'; color = 0xFFFF00; }
+      else if (percentage <= 80) { message = 'Great chemistry! 💕'; color = 0xFF69B4; }
+      else { message = 'SOULMATES! Made for each other 💞'; color = 0xFF0000; }
+      return interaction.reply({
+        embeds: [{
+          color,
+          title: `❤️ Love Meter`,
+          description: `**${user1.username}** ❤️ **${user2.username}**\n\n**${percentage}% compatibility!**\n\n${message}`,
+          thumbnail: { url: user1.displayAvatarURL({ size: 256 }) }
+        }]
+      });
+    }
+
+    if (name === 'roast') {
+      const target = interaction.options.getUser('user');
+      const roast = roasts[Math.floor(Math.random() * roasts.length)];
+      return interaction.reply({
+        embeds: [{
+          color: 0xFF4500,
+          title: `🔥 Roasting ${target.username}...`,
+          description: roast,
+          thumbnail: { url: target.displayAvatarURL({ size: 256 }) },
+          footer: { text: 'Just a joke, no harm intended 😄' }
+        }]
+      });
+    }
+
+    if (name === 'pull') {
+      const roll = Math.random();
+      const pool = roll < 0.20
+        ? genshinCharacters.filter(c => c.stars === 5)
+        : genshinCharacters.filter(c => c.stars === 4);
+      const char = pool[Math.floor(Math.random() * pool.length)];
+      const stars = '⭐'.repeat(char.stars);
+      const color = char.stars === 5 ? 0xFFD700 : 0xC0C0C0;
+      return interaction.reply({
+        embeds: [{
+          color,
+          title: `✨ Wishing...`,
+          description: `${char.icon} **${char.name}** — ${char.element}\n${stars}`,
+          footer: { text: char.stars === 5 ? '🎉 RARE PULL! Lucky!' : 'Better luck next time for a 5★!' }
+        }]
+      });
+    }
+
+    if (name === 'main') {
+      const char = genshinCharacters[Math.floor(Math.random() * genshinCharacters.length)];
+      const stars = '⭐'.repeat(char.stars);
+      const color = char.stars === 5 ? 0xFFD700 : 0xC0C0C0;
+      const mainerMessages = [
+        `You are definitely a ${char.name} main and you know it.`,
+        `The algorithm has spoken — you main ${char.name}.`,
+        `${char.name} main spotted. No cap.`,
+        `You have ${char.name} at C6 and you use them everywhere, don't you?`,
+        `Your main is ${char.name}. Accept your fate.`,
+      ];
+      const msg = mainerMessages[Math.floor(Math.random() * mainerMessages.length)];
+      return interaction.reply({
+        embeds: [{
+          color,
+          title: `🎮 Your Genshin Main`,
+          description: `${char.icon} **${char.name}** — ${char.element}\n${stars}\n\n${msg}`,
+          footer: { text: 'Based on pure randomness (and destiny)' }
+        }]
+      });
+    }
+
+    // ===== ADMIN COMMANDS =====
 
     if (name === 'kick') {
       const target = interaction.options.getMember('user');
