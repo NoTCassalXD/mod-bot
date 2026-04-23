@@ -62,18 +62,14 @@ const genshinCharacters = [
 ];
 
 const roasts = [
-  "Your Wi-Fi password is probably 'password123' isn't it? 😂",
-  "You look like you AFK in the overworld for 3 hours and call it 'exploring' 💀",
-  "I've seen slimes with better aim than you 🎯",
-  "You're the type to build full ATK on a healer 😭",
-  "Even Paimon roams more than you do 🧚",
-  "You still haven't cleared Spiral Abyss floor 9, huh? No worries 👀",
-  "Your fashion sense makes Childe's outfits look stylish 💅",
-  "You're so average even the Traveler has more lore than you 😅",
-  "I heard you use Barbara as your main DPS. Respect... I guess 🫡",
-  "You probably skip all the story cutscenes and then ask what's happening 🤦",
-  "Your team comp is so bad even the hilichurls feel bad for you 🏕️",
-  "You're the type to run out of resin and then complain there's nothing to do 😆",
+  "you are the reason god created middle finger",
+  "You have a face that would make onions cry.",
+  "I look at you and think, “Two billion years of evolution, for this?",
+  "Reality check: your opinion missed the update Streaming platforms crash less than your arguments",
+  "Behti hai nadi girta hai jharna  are madarchod apna kaam krna",
+  "TikTok trends move faster than your life plans.",
+  "Watching your excuses is like binge-watching a glitchy reality show.",
+  "AI can write novels faster than you finish a sentence.",
 ];
 
 // ===== MEMBER COMMANDS =====
