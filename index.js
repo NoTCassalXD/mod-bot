@@ -404,70 +404,65 @@ client.on('interactionCreate', async interaction => {
       });
     }
 
-    if (name === 'inventory') {
-      const target = interaction.options.getUser('user') || interaction.user;
-      const data = await Inventory.findOne({ userId: target.id });
+if (name === 'inventory') {
+  await interaction.deferReply(); // ← fixes the timeout
+  const target = interaction.options.getUser('user') || interaction.user;
+  const data = await Inventory.findOne({ userId: target.id });
 
-      if (!data || data.characters.length === 0) {
-        return interaction.reply({
-          embeds: [{
-            color: 0x5865F2,
-            title: `📦 ${target.username}'s Inventory`,
-            description: target.id === interaction.user.id
-              ? "You haven't pulled any characters yet!\nUse **/pull** to start your collection! ✨"
-              : `${target.username} hasn't pulled any characters yet!`,
-            thumbnail: { url: target.displayAvatarURL({ size: 256 }) }
-          }]
-        });
-      }
+  if (!data || data.characters.length === 0) {
+    return interaction.editReply({
+      embeds: [{
+        color: 0x5865F2,
+        title: `📦 ${target.username}'s Inventory`,
+        description: target.id === interaction.user.id
+          ? "You haven't pulled any characters yet!\nUse **/pull** to start your collection! ✨"
+          : `${target.username} hasn't pulled any characters yet!`,
+        thumbnail: { url: target.displayAvatarURL({ size: 256 }) }
+      }]
+    });
+  }
 
-      // Count characters
-      const total = data.characters.length;
-      const fiveStars = data.characters.filter(c => c.stars === 5);
-      const fourStars = data.characters.filter(c => c.stars === 4);
+  const total = data.characters.length;
+  const fiveStars = data.characters.filter(c => c.stars === 5);
+  const fourStars = data.characters.filter(c => c.stars === 4);
 
-      // Get unique characters with counts
-      const charCounts = {};
-      for (const c of data.characters) {
-        if (!charCounts[c.name]) charCounts[c.name] = { ...c, count: 0 };
-        charCounts[c.name].count++;
-      }
+  const charCounts = {};
+  for (const c of data.characters) {
+    if (!charCounts[c.name]) charCounts[c.name] = { ...c, count: 0 };
+    charCounts[c.name].count++;
+  }
 
-      // Sort: 5★ first, then 4★, then by name
-      const sorted = Object.values(charCounts).sort((a, b) => {
-        if (b.stars !== a.stars) return b.stars - a.stars;
-        return a.name.localeCompare(b.name);
-      });
+  const sorted = Object.values(charCounts).sort((a, b) => {
+    if (b.stars !== a.stars) return b.stars - a.stars;
+    return a.name.localeCompare(b.name);
+  });
 
-      // Build inventory list (max 20 shown)
-      const shown = sorted.slice(0, 20);
-      const inventoryList = shown.map(c => {
-        const dupText = c.count > 1 ? ` ×${c.count}` : '';
-        return `${c.icon} **${c.name}**${dupText} — ${c.element} ${'⭐'.repeat(c.stars)}`;
-      }).join('\n');
+  const shown = sorted.slice(0, 20);
+  const inventoryList = shown.map(c => {
+    const dupText = c.count > 1 ? ` ×${c.count}` : '';
+    return `${c.icon} **${c.name}**${dupText} — ${c.element} ${'⭐'.repeat(c.stars)}`;
+  }).join('\n');
 
-      const moreText = sorted.length > 20 ? `\n*...and ${sorted.length - 20} more characters*` : '';
+  const moreText = sorted.length > 20 ? `\n*...and ${sorted.length - 20} more characters*` : '';
+  const lastChar = data.characters[data.characters.length - 1];
 
-      // Get last pulled character for thumbnail
-      const lastChar = data.characters[data.characters.length - 1];
-
-      return interaction.reply({
-        embeds: [{
-          color: 0xFFD700,
-          author: { name: `📦 ${target.username}'s Inventory`, icon_url: target.displayAvatarURL() },
-          description: inventoryList + moreText,
-          thumbnail: { url: lastChar.image },
-          fields: [
-            { name: '📊 Total Pulls', value: `${total}`, inline: true },
-            { name: '⭐ 5★ Characters', value: `${fiveStars.length}`, inline: true },
-            { name: '✨ 4★ Characters', value: `${fourStars.length}`, inline: true },
-            { name: '🎯 Unique Characters', value: `${sorted.length}`, inline: true },
-          ],
-          footer: { text: 'Keep pulling to grow your collection!' },
-          timestamp: new Date().toISOString()
-        }]
-      });
-    }
+  return interaction.editReply({
+    embeds: [{
+      color: 0xFFD700,
+      author: { name: `📦 ${target.username}'s Inventory`, icon_url: target.displayAvatarURL() },
+      description: inventoryList + moreText,
+      thumbnail: { url: lastChar.image },
+      fields: [
+        { name: '📊 Total Pulls', value: `${total}`, inline: true },
+        { name: '⭐ 5★ Characters', value: `${fiveStars.length}`, inline: true },
+        { name: '✨ 4★ Characters', value: `${fourStars.length}`, inline: true },
+        { name: '🎯 Unique Characters', value: `${sorted.length}`, inline: true },
+      ],
+      footer: { text: 'Keep pulling to grow your collection!' },
+      timestamp: new Date().toISOString()
+    }]
+  });
+} 
 
     // ===== ADMIN COMMANDS =====
 
