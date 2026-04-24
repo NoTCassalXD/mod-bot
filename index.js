@@ -9,6 +9,7 @@ const {
 } = require('discord.js');
 
 const axios = require('axios');
+const mongoose = require('mongoose');
 
 const client = new Client({
   intents: [
@@ -21,8 +22,33 @@ const client = new Client({
 
 const TOKEN = process.env.TOKEN;
 const CLIENT_ID = process.env.CLIENT_ID;
+const MONGODB_URI = process.env.MONGODB_URI;
 
-// ===== GENSHIN CHARACTERS (with images from Genshin API) =====
+// ===== MONGODB CONNECT =====
+mongoose.connect(MONGODB_URI)
+  .then(() => console.log('✅ Connected to MongoDB!'))
+  .catch(err => console.error('❌ MongoDB connection error:', err));
+
+// ===== INVENTORY SCHEMA =====
+const inventorySchema = new mongoose.Schema({
+  userId: { type: String, required: true, unique: true },
+  username: { type: String },
+  characters: [
+    {
+      name: String,
+      stars: Number,
+      element: String,
+      icon: String,
+      image: String,
+      color: Number,
+      pulledAt: { type: Date, default: Date.now }
+    }
+  ]
+});
+
+const Inventory = mongoose.model('Inventory', inventorySchema);
+
+// ===== GENSHIN CHARACTERS =====
 const genshinCharacters = [
   { name: 'Neuvillette', stars: 5, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Neuvillette.png' },
   { name: 'Furina', stars: 5, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Furina.png' },
@@ -62,9 +88,9 @@ const genshinCharacters = [
 const roasts = [
   "you are the reason god created middle finger",
   "You have a face that would make onions cry.",
-  "I look at you and think, “Two billion years of evolution, for this?",
-  "Reality check: your opinion missed the update Streaming platforms crash less than your arguments",
-  "Behti hai nadi girta hai jharna  are madarchod apna kaam krna",
+  "I look at you and think, 'Two billion years of evolution, for this?'",
+  "Reality check: your opinion missed the update. Streaming platforms crash less than your arguments.",
+  "Behti hai nadi girta hai jharna, are madarchod apna kaam krna 💀",
   "TikTok trends move faster than your life plans.",
   "Watching your excuses is like binge-watching a glitchy reality show.",
   "AI can write novels faster than you finish a sentence.",
@@ -93,6 +119,8 @@ const memberCommands = [
     .addUserOption(o => o.setName('user').setDescription('User to roast').setRequired(true)),
   new SlashCommandBuilder().setName('pull').setDescription('Pull a random Genshin Impact character ✨'),
   new SlashCommandBuilder().setName('main').setDescription('See what Genshin character you main 🎮'),
+  new SlashCommandBuilder().setName('inventory').setDescription('View your pulled Genshin characters 📦')
+    .addUserOption(o => o.setName('user').setDescription('View another user\'s inventory')),
 ];
 
 // ===== ADMIN COMMANDS =====
@@ -316,12 +344,33 @@ client.on('interactionCreate', async interaction => {
       const char = pool[Math.floor(Math.random() * pool.length)];
       const stars = '⭐'.repeat(char.stars);
       const is5Star = char.stars === 5;
+
+      // Save to inventory in MongoDB
+      await Inventory.findOneAndUpdate(
+        { userId: interaction.user.id },
+        {
+          $set: { username: interaction.user.username },
+          $push: {
+            characters: {
+              name: char.name,
+              stars: char.stars,
+              element: char.element,
+              icon: char.icon,
+              image: char.image,
+              color: char.color,
+              pulledAt: new Date()
+            }
+          }
+        },
+        { upsert: true, new: true }
+      );
+
       return interaction.reply({
         embeds: [{
           color: char.color,
           author: { name: '✨ Genshin Impact — Wish Result' },
           title: `${char.icon} ${char.name}`,
-          description: `**Element:** ${char.element}\n**Rarity:** ${stars}\n\n${is5Star ? '🎉 **RARE 5★ PULL! You got lucky!**' : '💫 A fine addition to your roster!'}`,
+          description: `**Element:** ${char.element}\n**Rarity:** ${stars}\n\n${is5Star ? '🎉 **RARE 5★ PULL! You got lucky!**' : '💫 A fine addition to your roster!'}\n\n*Added to your inventory! Use /inventory to view.*`,
           image: { url: char.image },
           footer: { text: is5Star ? '✦ 5★ Character Obtained!' : '✦ 4★ Character Obtained!' },
           timestamp: new Date().toISOString()
@@ -350,6 +399,71 @@ client.on('interactionCreate', async interaction => {
           description: `**Element:** ${char.element}\n**Rarity:** ${stars}\n\n${msg}`,
           image: { url: char.image },
           footer: { text: is5Star ? '✦ 5★ Main — you have great taste!' : '✦ 4★ Main — underrated pick!' },
+          timestamp: new Date().toISOString()
+        }]
+      });
+    }
+
+    if (name === 'inventory') {
+      const target = interaction.options.getUser('user') || interaction.user;
+      const data = await Inventory.findOne({ userId: target.id });
+
+      if (!data || data.characters.length === 0) {
+        return interaction.reply({
+          embeds: [{
+            color: 0x5865F2,
+            title: `📦 ${target.username}'s Inventory`,
+            description: target.id === interaction.user.id
+              ? "You haven't pulled any characters yet!\nUse **/pull** to start your collection! ✨"
+              : `${target.username} hasn't pulled any characters yet!`,
+            thumbnail: { url: target.displayAvatarURL({ size: 256 }) }
+          }]
+        });
+      }
+
+      // Count characters
+      const total = data.characters.length;
+      const fiveStars = data.characters.filter(c => c.stars === 5);
+      const fourStars = data.characters.filter(c => c.stars === 4);
+
+      // Get unique characters with counts
+      const charCounts = {};
+      for (const c of data.characters) {
+        if (!charCounts[c.name]) charCounts[c.name] = { ...c, count: 0 };
+        charCounts[c.name].count++;
+      }
+
+      // Sort: 5★ first, then 4★, then by name
+      const sorted = Object.values(charCounts).sort((a, b) => {
+        if (b.stars !== a.stars) return b.stars - a.stars;
+        return a.name.localeCompare(b.name);
+      });
+
+      // Build inventory list (max 20 shown)
+      const shown = sorted.slice(0, 20);
+      const inventoryList = shown.map(c => {
+        const dupText = c.count > 1 ? ` ×${c.count}` : '';
+        return `${c.icon} **${c.name}**${dupText} — ${c.element} ${'⭐'.repeat(c.stars)}`;
+      }).join('\n');
+
+      const moreText = sorted.length > 20 ? `\n*...and ${sorted.length - 20} more characters*` : '';
+
+      // Get last pulled character for thumbnail
+      const lastChar = data.characters[data.characters.length - 1];
+
+      return interaction.reply({
+        embeds: [{
+          color: 0xFFD700,
+          author: { name: `📦 ${target.username}'s Inventory`, icon_url: target.displayAvatarURL() },
+          description: inventoryList + moreText,
+          thumbnail: { url: lastChar.image },
+          fields: [
+            { name: '📊 Total Pulls', value: `${total}`, inline: true },
+            { name: '⭐ 5★ Characters', value: `${fiveStars.length}`, inline: true },
+            { name: '✨ 4★ Characters', value: `${fourStars.length}`, inline: true },
+            { name: '🎯 Unique Characters', value: `${sorted.length}`, inline: true },
+          ],
+          footer: { text: 'Keep pulling to grow your collection!' },
           timestamp: new Date().toISOString()
         }]
       });
