@@ -22,43 +22,41 @@ const client = new Client({
 const TOKEN = process.env.TOKEN;
 const CLIENT_ID = process.env.CLIENT_ID;
 
-// ===== GENSHIN CHARACTERS =====
+// ===== GENSHIN CHARACTERS (with images from Genshin API) =====
 const genshinCharacters = [
-  { name: 'Neuvillette', stars: 5, element: 'Hydro', icon: '💧' },
-  { name: 'Furina', stars: 5, element: 'Hydro', icon: '💧' },
-  { name: 'Zhongli', stars: 5, element: 'Geo', icon: '🪨' },
-  { name: 'Raiden Shogun', stars: 5, element: 'Electro', icon: '⚡' },
-  { name: 'Kazuha', stars: 5, element: 'Anemo', icon: '🌀' },
-  { name: 'Hu Tao', stars: 5, element: 'Pyro', icon: '🔥' },
-  { name: 'Ganyu', stars: 5, element: 'Cryo', icon: '❄️' },
-  { name: 'Nahida', stars: 5, element: 'Dendro', icon: '🌿' },
-  { name: 'Yelan', stars: 5, element: 'Hydro', icon: '💧' },
-  { name: 'Xiao', stars: 5, element: 'Anemo', icon: '🌀' },
-  { name: 'Arlecchino', stars: 5, element: 'Pyro', icon: '🔥' },
-  { name: 'Navia', stars: 5, element: 'Geo', icon: '🪨' },
-  { name: 'Clorinde', stars: 5, element: 'Electro', icon: '⚡' },
-  { name: 'Wriothesley', stars: 5, element: 'Cryo', icon: '❄️' },
-  { name: 'Lyney', stars: 5, element: 'Pyro', icon: '🔥' },
-  { name: 'Wanderer', stars: 5, element: 'Anemo', icon: '🌀' },
-  { name: 'Cyno', stars: 5, element: 'Electro', icon: '⚡' },
-  { name: 'Nilou', stars: 5, element: 'Hydro', icon: '💧' },
-  { name: 'Tighnari', stars: 5, element: 'Dendro', icon: '🌿' },
-  { name: 'Ayaka', stars: 5, element: 'Cryo', icon: '❄️' },
-  { name: 'Ayato', stars: 5, element: 'Hydro', icon: '💧' },
-  { name: 'Itto', stars: 5, element: 'Geo', icon: '🪨' },
-  { name: 'Eula', stars: 5, element: 'Cryo', icon: '❄️' },
-  { name: 'Albedo', stars: 5, element: 'Geo', icon: '🪨' },
-  { name: 'Venti', stars: 5, element: 'Anemo', icon: '🌀' },
-  { name: 'Noelle', stars: 4, element: 'Geo', icon: '🪨' },
-  { name: 'Bennett', stars: 4, element: 'Pyro', icon: '🔥' },
-  { name: 'Xingqiu', stars: 4, element: 'Hydro', icon: '💧' },
-  { name: 'Fischl', stars: 4, element: 'Electro', icon: '⚡' },
-  { name: 'Xiangling', stars: 4, element: 'Pyro', icon: '🔥' },
-  { name: 'Sucrose', stars: 4, element: 'Anemo', icon: '🌀' },
-  { name: 'Beidou', stars: 4, element: 'Electro', icon: '⚡' },
-  { name: 'Razor', stars: 4, element: 'Electro', icon: '⚡' },
-  { name: 'Chongyun', stars: 4, element: 'Cryo', icon: '❄️' },
-  { name: 'Rosaria', stars: 4, element: 'Cryo', icon: '❄️' },
+  { name: 'Neuvillette', stars: 5, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Neuvillette.png' },
+  { name: 'Furina', stars: 5, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Furina.png' },
+  { name: 'Zhongli', stars: 5, element: 'Geo', icon: '🪨', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Zhongli.png' },
+  { name: 'Raiden Shogun', stars: 5, element: 'Electro', icon: '⚡', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Shougun.png' },
+  { name: 'Kazuha', stars: 5, element: 'Anemo', icon: '🌀', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Kazuha.png' },
+  { name: 'Hu Tao', stars: 5, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Hutao.png' },
+  { name: 'Ganyu', stars: 5, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Ganyu.png' },
+  { name: 'Nahida', stars: 5, element: 'Dendro', icon: '🌿', color: 0x86EFAC, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Nahida.png' },
+  { name: 'Yelan', stars: 5, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Yelan.png' },
+  { name: 'Xiao', stars: 5, element: 'Anemo', icon: '🌀', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Xiao.png' },
+  { name: 'Arlecchino', stars: 5, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Arlecchino.png' },
+  { name: 'Navia', stars: 5, element: 'Geo', icon: '🪨', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Navia.png' },
+  { name: 'Clorinde', stars: 5, element: 'Electro', icon: '⚡', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Clorinde.png' },
+  { name: 'Wriothesley', stars: 5, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Wriothesley.png' },
+  { name: 'Lyney', stars: 5, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Lyney.png' },
+  { name: 'Wanderer', stars: 5, element: 'Anemo', icon: '🌀', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Wanderer.png' },
+  { name: 'Cyno', stars: 5, element: 'Electro', icon: '⚡', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Cyno.png' },
+  { name: 'Nilou', stars: 5, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Nilou.png' },
+  { name: 'Ayaka', stars: 5, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Ayaka.png' },
+  { name: 'Ayato', stars: 5, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Ayato.png' },
+  { name: 'Itto', stars: 5, element: 'Geo', icon: '🪨', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Itto.png' },
+  { name: 'Eula', stars: 5, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Eula.png' },
+  { name: 'Venti', stars: 5, element: 'Anemo', icon: '🌀', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Venti.png' },
+  { name: 'Noelle', stars: 4, element: 'Geo', icon: '🪨', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Noel.png' },
+  { name: 'Bennett', stars: 4, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Bennett.png' },
+  { name: 'Xingqiu', stars: 4, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Xingqiu.png' },
+  { name: 'Fischl', stars: 4, element: 'Electro', icon: '⚡', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Fischl.png' },
+  { name: 'Xiangling', stars: 4, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Xiangling.png' },
+  { name: 'Sucrose', stars: 4, element: 'Anemo', icon: '🌀', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Sucrose.png' },
+  { name: 'Beidou', stars: 4, element: 'Electro', icon: '⚡', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Beidou.png' },
+  { name: 'Razor', stars: 4, element: 'Electro', icon: '⚡', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Razor.png' },
+  { name: 'Chongyun', stars: 4, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Chongyun.png' },
+  { name: 'Rosaria', stars: 4, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Rosaria.png' },
 ];
 
 const roasts = [
@@ -74,112 +72,54 @@ const roasts = [
 
 // ===== MEMBER COMMANDS =====
 const memberCommands = [
-  new SlashCommandBuilder()
-    .setName('ping')
-    .setDescription('Check latency'),
-
-  new SlashCommandBuilder()
-    .setName('avatar')
-    .setDescription("Show a user's avatar")
+  new SlashCommandBuilder().setName('ping').setDescription('Check latency'),
+  new SlashCommandBuilder().setName('avatar').setDescription("Show a user's avatar")
     .addUserOption(o => o.setName('user').setDescription('User (leave empty for yourself)')),
-
-  new SlashCommandBuilder()
-    .setName('userinfo')
-    .setDescription('Show info about a user')
+  new SlashCommandBuilder().setName('userinfo').setDescription('Show info about a user')
     .addUserOption(o => o.setName('user').setDescription('User (leave empty for yourself)')),
-
-  new SlashCommandBuilder()
-    .setName('serverinfo')
-    .setDescription('Show server info'),
-
-  new SlashCommandBuilder()
-    .setName('meme')
-    .setDescription('Get a random meme'),
-
-  new SlashCommandBuilder()
-    .setName('coinflip')
-    .setDescription('Flip a coin'),
-
-  new SlashCommandBuilder()
-    .setName('say')
-    .setDescription('Make the bot say something')
+  new SlashCommandBuilder().setName('serverinfo').setDescription('Show server info'),
+  new SlashCommandBuilder().setName('meme').setDescription('Get a random meme'),
+  new SlashCommandBuilder().setName('coinflip').setDescription('Flip a coin'),
+  new SlashCommandBuilder().setName('say').setDescription('Make the bot say something')
     .addStringOption(o => o.setName('text').setDescription('Message to send').setRequired(true)),
-
-  new SlashCommandBuilder()
-    .setName('gay')
-    .setDescription('Check how gay someone is 🏳️‍🌈')
+  new SlashCommandBuilder().setName('gay').setDescription('Check how gay someone is 🏳️‍🌈')
     .addUserOption(o => o.setName('user').setDescription('User (leave empty for yourself)')),
-
-  new SlashCommandBuilder()
-    .setName('sus')
-    .setDescription('Check how sus someone is 🔴')
+  new SlashCommandBuilder().setName('sus').setDescription('Check how sus someone is 🔴')
     .addUserOption(o => o.setName('user').setDescription('User (leave empty for yourself)')),
-
-  new SlashCommandBuilder()
-    .setName('love')
-    .setDescription('Check love compatibility between two users ❤️')
+  new SlashCommandBuilder().setName('love').setDescription('Check love compatibility ❤️')
     .addUserOption(o => o.setName('user1').setDescription('First user').setRequired(true))
     .addUserOption(o => o.setName('user2').setDescription('Second user').setRequired(true)),
-
-  new SlashCommandBuilder()
-    .setName('roast')
-    .setDescription('Roast someone 🔥')
+  new SlashCommandBuilder().setName('roast').setDescription('Roast someone 🔥')
     .addUserOption(o => o.setName('user').setDescription('User to roast').setRequired(true)),
-
-  new SlashCommandBuilder()
-    .setName('pull')
-    .setDescription('Pull a random Genshin Impact character ✨'),
-
-  new SlashCommandBuilder()
-    .setName('main')
-    .setDescription('See what Genshin character you main 🎮'),
+  new SlashCommandBuilder().setName('pull').setDescription('Pull a random Genshin Impact character ✨'),
+  new SlashCommandBuilder().setName('main').setDescription('See what Genshin character you main 🎮'),
 ];
 
 // ===== ADMIN COMMANDS =====
 const adminCommands = [
-  new SlashCommandBuilder()
-    .setName('kick')
-    .setDescription('[ADMIN] Kick a user')
+  new SlashCommandBuilder().setName('kick').setDescription('[ADMIN] Kick a user')
     .setDefaultMemberPermissions(PermissionsBitField.Flags.KickMembers)
     .addUserOption(o => o.setName('user').setDescription('User to kick').setRequired(true))
     .addStringOption(o => o.setName('reason').setDescription('Reason')),
-
-  new SlashCommandBuilder()
-    .setName('ban')
-    .setDescription('[ADMIN] Ban a user')
+  new SlashCommandBuilder().setName('ban').setDescription('[ADMIN] Ban a user')
     .setDefaultMemberPermissions(PermissionsBitField.Flags.BanMembers)
     .addUserOption(o => o.setName('user').setDescription('User to ban').setRequired(true))
     .addStringOption(o => o.setName('reason').setDescription('Reason')),
-
-  new SlashCommandBuilder()
-    .setName('warn')
-    .setDescription('[ADMIN] Warn a user')
+  new SlashCommandBuilder().setName('warn').setDescription('[ADMIN] Warn a user')
     .setDefaultMemberPermissions(PermissionsBitField.Flags.ModerateMembers)
     .addUserOption(o => o.setName('user').setDescription('User to warn').setRequired(true))
     .addStringOption(o => o.setName('reason').setDescription('Reason')),
-
-  new SlashCommandBuilder()
-    .setName('mute')
-    .setDescription('[ADMIN] Timeout a user')
+  new SlashCommandBuilder().setName('mute').setDescription('[ADMIN] Timeout a user')
     .setDefaultMemberPermissions(PermissionsBitField.Flags.ModerateMembers)
     .addUserOption(o => o.setName('user').setDescription('User to mute').setRequired(true))
     .addIntegerOption(o => o.setName('minutes').setDescription('Duration in minutes').setRequired(true)),
-
-  new SlashCommandBuilder()
-    .setName('unmute')
-    .setDescription('[ADMIN] Remove timeout from a user')
+  new SlashCommandBuilder().setName('unmute').setDescription('[ADMIN] Remove timeout from a user')
     .setDefaultMemberPermissions(PermissionsBitField.Flags.ModerateMembers)
     .addUserOption(o => o.setName('user').setDescription('User to unmute').setRequired(true)),
-
-  new SlashCommandBuilder()
-    .setName('clear')
-    .setDescription('[ADMIN] Clear messages (1-100)')
+  new SlashCommandBuilder().setName('clear').setDescription('[ADMIN] Clear messages (1-100)')
     .setDefaultMemberPermissions(PermissionsBitField.Flags.ManageMessages)
     .addIntegerOption(o => o.setName('amount').setDescription('Number of messages (1-100)').setRequired(true)),
-
-  new SlashCommandBuilder()
-    .setName('purge')
-    .setDescription('[ADMIN] Delete messages (1-100)')
+  new SlashCommandBuilder().setName('purge').setDescription('[ADMIN] Delete messages (1-100)')
     .setDefaultMemberPermissions(PermissionsBitField.Flags.ManageMessages)
     .addIntegerOption(o => o.setName('amount').setDescription('Number of messages (1-100)').setRequired(true)),
 ];
@@ -189,9 +129,7 @@ const allCommands = [...memberCommands, ...adminCommands].map(cmd => cmd.toJSON(
 // ===== REGISTER COMMANDS GLOBALLY =====
 client.once('ready', async () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
-
   const rest = new REST({ version: '10' }).setToken(TOKEN);
-
   try {
     console.log('⏳ Registering commands globally...');
     await rest.put(Routes.applicationCommands(CLIENT_ID), { body: allCommands });
@@ -322,7 +260,7 @@ client.on('interactionCreate', async interaction => {
       if (percentage <= 20) { message = 'Probably innocent... probably. 🟢'; color = 0x57F287; }
       else if (percentage <= 40) { message = 'A little sus but nothing major 🟡'; color = 0xFFFF00; }
       else if (percentage <= 60) { message = 'Kinda sus ngl... 🟠'; color = 0xFFAA00; }
-      else if (percentage <= 80) { message = 'Very sus! I\'m voting them out 🔴'; color = 0xFF5555; }
+      else if (percentage <= 80) { message = "Very sus! I'm voting them out 🔴"; color = 0xFF5555; }
       else { message = 'MEGA SUS! 100% the impostor 📮'; color = 0xFF0000; }
       return interaction.reply({
         embeds: [{
@@ -377,13 +315,16 @@ client.on('interactionCreate', async interaction => {
         : genshinCharacters.filter(c => c.stars === 4);
       const char = pool[Math.floor(Math.random() * pool.length)];
       const stars = '⭐'.repeat(char.stars);
-      const color = char.stars === 5 ? 0xFFD700 : 0xC0C0C0;
+      const is5Star = char.stars === 5;
       return interaction.reply({
         embeds: [{
-          color,
-          title: `✨ Wishing...`,
-          description: `${char.icon} **${char.name}** — ${char.element}\n${stars}`,
-          footer: { text: char.stars === 5 ? '🎉 RARE PULL! Lucky!' : 'Better luck next time for a 5★!' }
+          color: char.color,
+          author: { name: '✨ Genshin Impact — Wish Result' },
+          title: `${char.icon} ${char.name}`,
+          description: `**Element:** ${char.element}\n**Rarity:** ${stars}\n\n${is5Star ? '🎉 **RARE 5★ PULL! You got lucky!**' : '💫 A fine addition to your roster!'}`,
+          image: { url: char.image },
+          footer: { text: is5Star ? '✦ 5★ Character Obtained!' : '✦ 4★ Character Obtained!' },
+          timestamp: new Date().toISOString()
         }]
       });
     }
@@ -391,21 +332,25 @@ client.on('interactionCreate', async interaction => {
     if (name === 'main') {
       const char = genshinCharacters[Math.floor(Math.random() * genshinCharacters.length)];
       const stars = '⭐'.repeat(char.stars);
-      const color = char.stars === 5 ? 0xFFD700 : 0xC0C0C0;
+      const is5Star = char.stars === 5;
       const mainerMessages = [
-        `You are definitely a ${char.name} main and you know it.`,
-        `The algorithm has spoken — you main ${char.name}.`,
-        `${char.name} main spotted. No cap.`,
-        `You have ${char.name} at C6 and you use them everywhere, don't you?`,
-        `Your main is ${char.name}. Accept your fate.`,
+        `You are definitely a **${char.name}** main and you know it.`,
+        `The algorithm has spoken — you main **${char.name}**.`,
+        `**${char.name}** main spotted. No cap. 💀`,
+        `You have **${char.name}** at C6 and use them in every domain, don't you?`,
+        `Your main is **${char.name}**. Accept your fate. 🫡`,
+        `Destiny has decided — **${char.name}** is your main forever.`,
       ];
       const msg = mainerMessages[Math.floor(Math.random() * mainerMessages.length)];
       return interaction.reply({
         embeds: [{
-          color,
-          title: `🎮 Your Genshin Main`,
-          description: `${char.icon} **${char.name}** — ${char.element}\n${stars}\n\n${msg}`,
-          footer: { text: 'Based on pure randomness (and destiny)' }
+          color: char.color,
+          author: { name: `🎮 ${interaction.user.username}'s Genshin Main`, icon_url: interaction.user.displayAvatarURL() },
+          title: `${char.icon} ${char.name}`,
+          description: `**Element:** ${char.element}\n**Rarity:** ${stars}\n\n${msg}`,
+          image: { url: char.image },
+          footer: { text: is5Star ? '✦ 5★ Main — you have great taste!' : '✦ 4★ Main — underrated pick!' },
+          timestamp: new Date().toISOString()
         }]
       });
     }
