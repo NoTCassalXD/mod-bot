@@ -462,7 +462,21 @@ if (name === 'inventory') {
       timestamp: new Date().toISOString()
     }]
   });
-} 
+}
+
+if (name === "inventory") {
+  await interaction.deferReply(); // 🔥 THIS FIXES "thinking..."
+
+  try {
+    // your API call here
+    const result = "Your inventory is empty 🧍"; // example
+
+    await interaction.editReply(result);
+  } catch (err) {
+    console.error(err);
+    await interaction.editReply("❌ Failed to fetch inventory");
+  }
+}
 
     // ===== ADMIN COMMANDS =====
 
