@@ -433,10 +433,12 @@ client.on('interactionCreate', async interaction => {
         charCounts[c.name].count++;
       }
 
-      const sorted = Object.values(charCounts).sort((a, b) => {
-        if (b.stars !== a.stars) return b.stars - a.stars;
-        return a.name.localeCompare(b.name);
-      });
+      const sorted = Object.values(charCounts)
+  .filter(c => c && c.name && c.stars)
+  .sort((a, b) => {
+    if (b.stars !== a.stars) return b.stars - a.stars;
+    return a.name.localeCompare(b.name);
+  });
 
       const shown = sorted.slice(0, 20);
       const inventoryList = shown.map(c => {
