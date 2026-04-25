@@ -434,7 +434,7 @@ client.on('interactionCreate', async interaction => {
       }
 
       const sorted = Object.values(charCounts)
-  .filter(c => c && c.name && c.stars)
+  .filter(c => c && c.name)
   .sort((a, b) => {
     if (b.stars !== a.stars) return b.stars - a.stars;
     return a.name.localeCompare(b.name);
@@ -442,9 +442,12 @@ client.on('interactionCreate', async interaction => {
 
       const shown = sorted.slice(0, 20);
       const inventoryList = shown.map(c => {
-        const dupText = c.count > 1 ? ` ×${c.count}` : '';
-        return `${c.icon} **${c.name}**${dupText} — ${c.element} ${'⭐'.repeat(c.stars)}`;
-      }).join('\n');
+  const dupText = c.count > 1 ? ` ×${c.count}` : '';
+  const icon = c.icon || '✨';
+  const element = c.element || 'Unknown';
+  const stars = c.stars ? '⭐'.repeat(c.stars) : '⭐';
+  return `${icon} **${c.name}**${dupText} — ${element} ${stars}`;
+}).join('\n');
 
       const moreText = sorted.length > 20 ? `\n*...and ${sorted.length - 20} more characters*` : '';
       const lastChar = data.characters[data.characters.length - 1];
