@@ -378,6 +378,7 @@ client.on('interactionCreate', async interaction => {
     }
 
     if (name === 'main') {
+  return interaction.reply({ content: '🚧 This command is temporarily disabled!', ephemeral: true });
       const char = genshinCharacters[Math.floor(Math.random() * genshinCharacters.length)];
       const stars = '⭐'.repeat(char.stars);
       const is5Star = char.stars === 5;
