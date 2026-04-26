@@ -35,12 +35,12 @@ const inventorySchema = new mongoose.Schema({
   username: { type: String },
   characters: [
     {
-      name: String,
-      stars: Number,
-      element: String,
-      icon: String,
-      image: String,
-      color: Number,
+      name: { type: String, required: true },
+      stars: { type: Number, required: true },
+      element: { type: String, required: true },
+      icon: { type: String, required: true },
+      image: { type: String, required: true },
+      color: { type: Number, required: true },
       pulledAt: { type: Date, default: Date.now }
     }
   ]
@@ -86,7 +86,7 @@ const genshinCharacters = [
 ];
 
 const roasts = [
-  "you are the reason god created middle finger",
+  "you are the reason god created middle finger 💀",
   "You have a face that would make onions cry.",
   "I look at you and think, 'Two billion years of evolution, for this?'",
   "Reality check: your opinion missed the update. Streaming platforms crash less than your arguments.",
@@ -96,63 +96,33 @@ const roasts = [
   "AI can write novels faster than you finish a sentence.",
 ];
 
-// ===== MEMBER COMMANDS =====
-const memberCommands = [
-  new SlashCommandBuilder().setName('ping').setDescription('Check latency'),
+// ===== COMMANDS =====
+const commands = [
   new SlashCommandBuilder().setName('avatar').setDescription("Show a user's avatar")
     .addUserOption(o => o.setName('user').setDescription('User (leave empty for yourself)')),
+
+  new SlashCommandBuilder().setName('coinflip').setDescription('Flip a coin'),
+
+  new SlashCommandBuilder().setName('pull').setDescription('Pull a random Genshin Impact character ✨'),
+
+  new SlashCommandBuilder().setName('inventory').setDescription('View your pulled Genshin characters 📦')
+    .addUserOption(o => o.setName('user').setDescription("View another user's inventory")),
+
+  new SlashCommandBuilder().setName('serverinfo').setDescription('Show server info'),
+
   new SlashCommandBuilder().setName('userinfo').setDescription('Show info about a user')
     .addUserOption(o => o.setName('user').setDescription('User (leave empty for yourself)')),
-  new SlashCommandBuilder().setName('serverinfo').setDescription('Show server info'),
-  new SlashCommandBuilder().setName('meme').setDescription('Get a random meme'),
-  new SlashCommandBuilder().setName('coinflip').setDescription('Flip a coin'),
+
+  new SlashCommandBuilder().setName('roast').setDescription('Roast someone 🔥')
+    .addUserOption(o => o.setName('user').setDescription('User to roast').setRequired(true)),
+
   new SlashCommandBuilder().setName('say').setDescription('Make the bot say something')
     .addStringOption(o => o.setName('text').setDescription('Message to send').setRequired(true)),
-  new SlashCommandBuilder().setName('gay').setDescription('Check how gay someone is 🏳️‍🌈')
-    .addUserOption(o => o.setName('user').setDescription('User (leave empty for yourself)')),
-  new SlashCommandBuilder().setName('sus').setDescription('Check how sus someone is 🔴')
-    .addUserOption(o => o.setName('user').setDescription('User (leave empty for yourself)')),
+
   new SlashCommandBuilder().setName('love').setDescription('Check love compatibility ❤️')
     .addUserOption(o => o.setName('user1').setDescription('First user').setRequired(true))
     .addUserOption(o => o.setName('user2').setDescription('Second user').setRequired(true)),
-  new SlashCommandBuilder().setName('roast').setDescription('Roast someone 🔥')
-    .addUserOption(o => o.setName('user').setDescription('User to roast').setRequired(true)),
-  new SlashCommandBuilder().setName('pull').setDescription('Pull a random Genshin Impact character ✨'),
-  new SlashCommandBuilder().setName('main').setDescription('See what Genshin character you main 🎮'),
-  new SlashCommandBuilder().setName('inventory').setDescription('View your pulled Genshin characters 📦')
-    .addUserOption(o => o.setName('user').setDescription("View another user's inventory")),
 ];
-
-// ===== ADMIN COMMANDS =====
-const adminCommands = [
-  new SlashCommandBuilder().setName('kick').setDescription('[ADMIN] Kick a user')
-    .setDefaultMemberPermissions(PermissionsBitField.Flags.KickMembers)
-    .addUserOption(o => o.setName('user').setDescription('User to kick').setRequired(true))
-    .addStringOption(o => o.setName('reason').setDescription('Reason')),
-  new SlashCommandBuilder().setName('ban').setDescription('[ADMIN] Ban a user')
-    .setDefaultMemberPermissions(PermissionsBitField.Flags.BanMembers)
-    .addUserOption(o => o.setName('user').setDescription('User to ban').setRequired(true))
-    .addStringOption(o => o.setName('reason').setDescription('Reason')),
-  new SlashCommandBuilder().setName('warn').setDescription('[ADMIN] Warn a user')
-    .setDefaultMemberPermissions(PermissionsBitField.Flags.ModerateMembers)
-    .addUserOption(o => o.setName('user').setDescription('User to warn').setRequired(true))
-    .addStringOption(o => o.setName('reason').setDescription('Reason')),
-  new SlashCommandBuilder().setName('mute').setDescription('[ADMIN] Timeout a user')
-    .setDefaultMemberPermissions(PermissionsBitField.Flags.ModerateMembers)
-    .addUserOption(o => o.setName('user').setDescription('User to mute').setRequired(true))
-    .addIntegerOption(o => o.setName('minutes').setDescription('Duration in minutes').setRequired(true)),
-  new SlashCommandBuilder().setName('unmute').setDescription('[ADMIN] Remove timeout from a user')
-    .setDefaultMemberPermissions(PermissionsBitField.Flags.ModerateMembers)
-    .addUserOption(o => o.setName('user').setDescription('User to unmute').setRequired(true)),
-  new SlashCommandBuilder().setName('clear').setDescription('[ADMIN] Clear messages (1-100)')
-    .setDefaultMemberPermissions(PermissionsBitField.Flags.ManageMessages)
-    .addIntegerOption(o => o.setName('amount').setDescription('Number of messages (1-100)').setRequired(true)),
-  new SlashCommandBuilder().setName('purge').setDescription('[ADMIN] Delete messages (1-100)')
-    .setDefaultMemberPermissions(PermissionsBitField.Flags.ManageMessages)
-    .addIntegerOption(o => o.setName('amount').setDescription('Number of messages (1-100)').setRequired(true)),
-];
-
-const allCommands = [...memberCommands, ...adminCommands].map(cmd => cmd.toJSON());
 
 // ===== REGISTER COMMANDS GLOBALLY =====
 client.once('ready', async () => {
@@ -160,26 +130,12 @@ client.once('ready', async () => {
   const rest = new REST({ version: '10' }).setToken(TOKEN);
   try {
     console.log('⏳ Registering commands globally...');
-    await rest.put(Routes.applicationCommands(CLIENT_ID), { body: allCommands });
-    console.log(`✅ Successfully registered ${allCommands.length} commands globally!`);
+    await rest.put(Routes.applicationCommands(CLIENT_ID), { body: commands.map(c => c.toJSON()) });
+    console.log(`✅ Successfully registered ${commands.length} commands globally!`);
   } catch (err) {
     console.error('❌ Failed to register commands:', err);
   }
 });
-
-// ===== PERMISSION CHECK =====
-const ADMIN_COMMANDS = ['kick', 'ban', 'warn', 'mute', 'unmute', 'clear', 'purge'];
-
-function isAdminOrOwner(interaction) {
-  const member = interaction.member;
-  const isOwner = interaction.guild.ownerId === member.id;
-  const isAdmin = member.permissions.has(PermissionsBitField.Flags.Administrator);
-  const canModerate = member.permissions.has(PermissionsBitField.Flags.ModerateMembers);
-  const canKick = member.permissions.has(PermissionsBitField.Flags.KickMembers);
-  const canBan = member.permissions.has(PermissionsBitField.Flags.BanMembers);
-  const canManageMessages = member.permissions.has(PermissionsBitField.Flags.ManageMessages);
-  return isOwner || isAdmin || canModerate || canKick || canBan || canManageMessages;
-}
 
 // ===== INTERACTIONS =====
 client.on('interactionCreate', async interaction => {
@@ -187,31 +143,7 @@ client.on('interactionCreate', async interaction => {
 
   const name = interaction.commandName;
 
-  if (ADMIN_COMMANDS.includes(name) && !isAdminOrOwner(interaction)) {
-    return interaction.reply({
-      content: '🚫 You do not have permission to use this command.',
-      ephemeral: true
-    });
-  }
-
   try {
-
-    if (name === 'ping') {
-      return interaction.reply(`🏓 Pong! Latency: **${client.ws.ping}ms**`);
-    }
-
-    if (name === 'coinflip') {
-      return interaction.reply(Math.random() < 0.5 ? '🪙 Heads!' : '🪙 Tails!');
-    }
-
-    if (name === 'say') {
-      return interaction.reply(interaction.options.getString('text'));
-    }
-
-    if (name === 'meme') {
-      const res = await axios.get('https://meme-api.com/gimme');
-      return interaction.reply(res.data.url);
-    }
 
     if (name === 'avatar') {
       const target = interaction.options.getUser('user') || interaction.user;
@@ -222,6 +154,14 @@ client.on('interactionCreate', async interaction => {
           image: { url: target.displayAvatarURL({ size: 512 }) }
         }]
       });
+    }
+
+    if (name === 'coinflip') {
+      return interaction.reply(Math.random() < 0.5 ? '🪙 Heads!' : '🪙 Tails!');
+    }
+
+    if (name === 'say') {
+      return interaction.reply(interaction.options.getString('text'));
     }
 
     if (name === 'userinfo') {
@@ -261,42 +201,16 @@ client.on('interactionCreate', async interaction => {
       });
     }
 
-    if (name === 'gay') {
-      const target = interaction.options.getUser('user') || interaction.user;
-      const percentage = Math.floor(Math.random() * 101);
-      let message = '';
-      if (percentage <= 20) message = 'Totally straight!';
-      else if (percentage <= 40) message = 'Just a little fruity 🍓';
-      else if (percentage <= 60) message = 'Somewhere in the middle 👀';
-      else if (percentage <= 80) message = 'Pretty gay ngl 😳';
-      else message = 'MAXIMUM RAINBOW ENERGY 🌈';
+    if (name === 'roast') {
+      const target = interaction.options.getUser('user');
+      const roast = roasts[Math.floor(Math.random() * roasts.length)];
       return interaction.reply({
         embeds: [{
-          color: 0xFF69B4,
-          title: `🏳️‍🌈 Gay Meter`,
-          description: `**${target.username}** is **${percentage}% gay!**\n\n${message}`,
-          thumbnail: { url: target.displayAvatarURL({ size: 256 }) }
-        }]
-      });
-    }
-
-    if (name === 'sus') {
-      const target = interaction.options.getUser('user') || interaction.user;
-      const percentage = Math.floor(Math.random() * 101);
-      let message = '';
-      let color = 0xFF0000;
-      if (percentage <= 20) { message = 'Probably innocent... probably. 🟢'; color = 0x57F287; }
-      else if (percentage <= 40) { message = 'A little sus but nothing major 🟡'; color = 0xFFFF00; }
-      else if (percentage <= 60) { message = 'Kinda sus ngl... 🟠'; color = 0xFFAA00; }
-      else if (percentage <= 80) { message = "Very sus! I'm voting them out 🔴"; color = 0xFF5555; }
-      else { message = 'MEGA SUS! 100% the impostor 📮'; color = 0xFF0000; }
-      return interaction.reply({
-        embeds: [{
-          color,
-          title: `🔴 Sus Meter`,
-          description: `**${target.username}** is **${percentage}% sus!**\n\n${message}`,
+          color: 0xFF4500,
+          title: `🔥 Roasting ${target.username}...`,
+          description: roast,
           thumbnail: { url: target.displayAvatarURL({ size: 256 }) },
-          footer: { text: 'Emergency meeting called!' }
+          footer: { text: 'Just a joke, no harm intended 😄' }
         }]
       });
     }
@@ -318,20 +232,6 @@ client.on('interactionCreate', async interaction => {
           title: `❤️ Love Meter`,
           description: `**${user1.username}** ❤️ **${user2.username}**\n\n**${percentage}% compatibility!**\n\n${message}`,
           thumbnail: { url: user1.displayAvatarURL({ size: 256 }) }
-        }]
-      });
-    }
-
-    if (name === 'roast') {
-      const target = interaction.options.getUser('user');
-      const roast = roasts[Math.floor(Math.random() * roasts.length)];
-      return interaction.reply({
-        embeds: [{
-          color: 0xFF4500,
-          title: `🔥 Roasting ${target.username}...`,
-          description: roast,
-          thumbnail: { url: target.displayAvatarURL({ size: 256 }) },
-          footer: { text: 'Just a joke, no harm intended 😄' }
         }]
       });
     }
@@ -377,159 +277,75 @@ client.on('interactionCreate', async interaction => {
       });
     }
 
-    if (name === 'main') {
-  return interaction.reply({ content: '🚧 This command is temporarily disabled!', ephemeral: true });
-      const char = genshinCharacters[Math.floor(Math.random() * genshinCharacters.length)];
-      const stars = '⭐'.repeat(char.stars);
-      const is5Star = char.stars === 5;
-      const mainerMessages = [
-        `You are definitely a **${char.name}** main and you know it.`,
-        `The algorithm has spoken — you main **${char.name}**.`,
-        `**${char.name}** main spotted. No cap. 💀`,
-        `You have **${char.name}** at C6 and use them in every domain, don't you?`,
-        `Your main is **${char.name}**. Accept your fate. 🫡`,
-        `Destiny has decided — **${char.name}** is your main forever.`,
-      ];
-      const msg = mainerMessages[Math.floor(Math.random() * mainerMessages.length)];
-      return interaction.reply({
-        embeds: [{
-          color: char.color,
-          author: { name: `🎮 ${interaction.user.username}'s Genshin Main`, icon_url: interaction.user.displayAvatarURL() },
-          title: `${char.icon} ${char.name}`,
-          description: `**Element:** ${char.element}\n**Rarity:** ${stars}\n\n${msg}`,
-          image: { url: char.image },
-          footer: { text: is5Star ? '✦ 5★ Main — you have great taste!' : '✦ 4★ Main — underrated pick!' },
-          timestamp: new Date().toISOString()
-        }]
-      });
-    }
-
     if (name === 'inventory') {
-      await interaction.deferReply();
+      try {
+        await interaction.deferReply();
 
-      const target = interaction.options.getUser('user') || interaction.user;
-      const data = await Inventory.findOne({ userId: target.id });
+        const target = interaction.options.getUser('user') || interaction.user;
+        const data = await Inventory.findOne({ userId: target.id });
 
-      if (!data || data.characters.length === 0) {
+        if (!data || data.characters.length === 0) {
+          return interaction.editReply({
+            embeds: [{
+              color: 0x5865F2,
+              title: `📦 ${target.username}'s Inventory`,
+              description: target.id === interaction.user.id
+                ? "You haven't pulled any characters yet!\nUse **/pull** to start your collection! ✨"
+                : `${target.username} hasn't pulled any characters yet!`,
+              thumbnail: { url: target.displayAvatarURL({ size: 256 }) }
+            }]
+          });
+        }
+
+        const total = data.characters.length;
+        const fiveStars = data.characters.filter(c => c.stars === 5);
+        const fourStars = data.characters.filter(c => c.stars === 4);
+
+        const charCounts = {};
+        for (const c of data.characters) {
+          if (!c || !c.name) continue;
+          if (!charCounts[c.name]) charCounts[c.name] = { ...c._doc, count: 0 };
+          charCounts[c.name].count++;
+        }
+
+        const sorted = Object.values(charCounts)
+          .filter(c => c && c.name && c.stars)
+          .sort((a, b) => {
+            if (b.stars !== a.stars) return b.stars - a.stars;
+            return a.name.localeCompare(b.name);
+          });
+
+        const shown = sorted.slice(0, 20);
+        const inventoryList = shown.length > 0
+          ? shown.map(c => {
+              const dupText = c.count > 1 ? ` ×${c.count}` : '';
+              return `${c.icon || '✨'} **${c.name}**${dupText} — ${c.element || '?'} ${'⭐'.repeat(c.stars)}`;
+            }).join('\n')
+          : 'No characters found — use **/pull** to get some!';
+
+        const moreText = sorted.length > 20 ? `\n*...and ${sorted.length - 20} more characters*` : '';
+        const lastChar = data.characters[data.characters.length - 1];
+
         return interaction.editReply({
           embeds: [{
-            color: 0x5865F2,
-            title: `📦 ${target.username}'s Inventory`,
-            description: target.id === interaction.user.id
-              ? "You haven't pulled any characters yet!\nUse **/pull** to start your collection! ✨"
-              : `${target.username} hasn't pulled any characters yet!`,
-            thumbnail: { url: target.displayAvatarURL({ size: 256 }) }
+            color: 0xFFD700,
+            author: { name: `📦 ${target.username}'s Inventory`, icon_url: target.displayAvatarURL() },
+            description: inventoryList + moreText,
+            thumbnail: { url: lastChar?.image || target.displayAvatarURL() },
+            fields: [
+              { name: '📊 Total Pulls', value: `${total}`, inline: true },
+              { name: '⭐ 5★ Characters', value: `${fiveStars.length}`, inline: true },
+              { name: '✨ 4★ Characters', value: `${fourStars.length}`, inline: true },
+              { name: '🎯 Unique Characters', value: `${sorted.length}`, inline: true },
+            ],
+            footer: { text: 'Keep pulling to grow your collection!' },
+            timestamp: new Date().toISOString()
           }]
         });
+      } catch (err) {
+        console.error('❌ Inventory error:', err);
+        return interaction.editReply({ content: '❌ Failed to load inventory. Try again!' });
       }
-
-      const total = data.characters.length;
-      const fiveStars = data.characters.filter(c => c.stars === 5);
-      const fourStars = data.characters.filter(c => c.stars === 4);
-
-      const charCounts = {};
-      for (const c of data.characters) {
-        if (!charCounts[c.name]) charCounts[c.name] = { ...c, count: 0 };
-        charCounts[c.name].count++;
-      }
-
-      const sorted = Object.values(charCounts)
-  .filter(c => c && c.name)
-  .sort((a, b) => {
-    if (b.stars !== a.stars) return b.stars - a.stars;
-    return a.name.localeCompare(b.name);
-  });
-
-      const shown = sorted.slice(0, 20);
-      const inventoryList = shown.map(c => {
-  const dupText = c.count > 1 ? ` ×${c.count}` : '';
-  const icon = c.icon || '✨';
-  const element = c.element || 'Unknown';
-  const stars = c.stars ? '⭐'.repeat(c.stars) : '⭐';
-  return `${icon} **${c.name}**${dupText} — ${element} ${stars}`;
-}).join('\n');
-
-      const moreText = sorted.length > 20 ? `\n*...and ${sorted.length - 20} more characters*` : '';
-      const lastChar = data.characters[data.characters.length - 1];
-
-      return interaction.editReply({
-        embeds: [{
-          color: 0xFFD700,
-          author: { name: `📦 ${target.username}'s Inventory`, icon_url: target.displayAvatarURL() },
-          description: inventoryList + moreText,
-          thumbnail: { url: lastChar.image },
-          fields: [
-            { name: '📊 Total Pulls', value: `${total}`, inline: true },
-            { name: '⭐ 5★ Characters', value: `${fiveStars.length}`, inline: true },
-            { name: '✨ 4★ Characters', value: `${fourStars.length}`, inline: true },
-            { name: '🎯 Unique Characters', value: `${sorted.length}`, inline: true },
-          ],
-          footer: { text: 'Keep pulling to grow your collection!' },
-          timestamp: new Date().toISOString()
-        }]
-      });
-    }
-
-    // ===== ADMIN COMMANDS =====
-
-    if (name === 'kick') {
-      const target = interaction.options.getMember('user');
-      const reason = interaction.options.getString('reason') || 'No reason provided';
-      if (!target) return interaction.reply({ content: '❌ User not found.', ephemeral: true });
-      if (!target.kickable) return interaction.reply({ content: '❌ I cannot kick this user.', ephemeral: true });
-      await target.kick(reason);
-      return interaction.reply({
-        embeds: [{ color: 0xFF5555, title: '👢 User Kicked', fields: [{ name: 'User', value: `${target.user.tag}`, inline: true }, { name: 'Reason', value: reason, inline: true }] }]
-      });
-    }
-
-    if (name === 'ban') {
-      const target = interaction.options.getMember('user');
-      const reason = interaction.options.getString('reason') || 'No reason provided';
-      if (!target) return interaction.reply({ content: '❌ User not found.', ephemeral: true });
-      if (!target.bannable) return interaction.reply({ content: '❌ I cannot ban this user.', ephemeral: true });
-      await target.ban({ reason });
-      return interaction.reply({
-        embeds: [{ color: 0xFF0000, title: '🔨 User Banned', fields: [{ name: 'User', value: `${target.user.tag}`, inline: true }, { name: 'Reason', value: reason, inline: true }] }]
-      });
-    }
-
-    if (name === 'warn') {
-      const target = interaction.options.getUser('user');
-      const reason = interaction.options.getString('reason') || 'No reason provided';
-      if (!target) return interaction.reply({ content: '❌ User not found.', ephemeral: true });
-      return interaction.reply({
-        embeds: [{ color: 0xFFAA00, title: '⚠️ User Warned', fields: [{ name: 'User', value: `${target.tag}`, inline: true }, { name: 'Reason', value: reason, inline: true }] }]
-      });
-    }
-
-    if (name === 'mute') {
-      const target = interaction.options.getMember('user');
-      const minutes = interaction.options.getInteger('minutes');
-      if (!target) return interaction.reply({ content: '❌ User not found.', ephemeral: true });
-      if (!target.moderatable) return interaction.reply({ content: '❌ I cannot mute this user.', ephemeral: true });
-      await target.timeout(minutes * 60 * 1000, `Muted by ${interaction.user.tag}`);
-      return interaction.reply({
-        embeds: [{ color: 0xFFAA00, title: '🔇 User Muted', fields: [{ name: 'User', value: `${target.user.tag}`, inline: true }, { name: 'Duration', value: `${minutes} minute(s)`, inline: true }] }]
-      });
-    }
-
-    if (name === 'unmute') {
-      const target = interaction.options.getMember('user');
-      if (!target) return interaction.reply({ content: '❌ User not found.', ephemeral: true });
-      await target.timeout(null);
-      return interaction.reply({
-        embeds: [{ color: 0x57F287, title: '🔊 User Unmuted', fields: [{ name: 'User', value: `${target.user.tag}` }] }]
-      });
-    }
-
-    if (name === 'clear' || name === 'purge') {
-      const amount = interaction.options.getInteger('amount');
-      if (amount < 1 || amount > 100) {
-        return interaction.reply({ content: '❌ Amount must be between 1 and 100.', ephemeral: true });
-      }
-      await interaction.channel.bulkDelete(amount, true);
-      return interaction.reply({ content: `🗑️ Deleted **${amount}** message(s).`, ephemeral: true });
     }
 
   } catch (err) {
