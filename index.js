@@ -119,6 +119,8 @@ const commands = [
   new SlashCommandBuilder().setName('say').setDescription('Make the bot say something')
     .addStringOption(o => o.setName('text').setDescription('Message to send').setRequired(true)),
 
+  new SlashCommandBuilder().setName('meme').setDescription('Get a random meme'),
+
   new SlashCommandBuilder().setName('love').setDescription('Check love compatibility ❤️')
     .addUserOption(o => o.setName('user1').setDescription('First user').setRequired(true))
     .addUserOption(o => o.setName('user2').setDescription('Second user').setRequired(true)),
@@ -162,6 +164,11 @@ client.on('interactionCreate', async interaction => {
 
     if (name === 'say') {
       return interaction.reply(interaction.options.getString('text'));
+    }
+
+    if (name === 'meme') {
+      const res = await axios.get('https://meme-api.com/gimme');
+      return interaction.reply(res.data.url);
     }
 
     if (name === 'userinfo') {
@@ -278,74 +285,77 @@ client.on('interactionCreate', async interaction => {
     }
 
     if (name === 'inventory') {
-      try {
-        await interaction.deferReply();
+      await interaction.deferReply();
 
-        const target = interaction.options.getUser('user') || interaction.user;
-        const data = await Inventory.findOne({ userId: target.id });
+      const target = interaction.options.getUser('user') || interaction.user;
+      const data = await Inventory.findOne({ userId: target.id });
 
-        if (!data || data.characters.length === 0) {
-          return interaction.editReply({
-            embeds: [{
-              color: 0x5865F2,
-              title: `📦 ${target.username}'s Inventory`,
-              description: target.id === interaction.user.id
-                ? "You haven't pulled any characters yet!\nUse **/pull** to start your collection! ✨"
-                : `${target.username} hasn't pulled any characters yet!`,
-              thumbnail: { url: target.displayAvatarURL({ size: 256 }) }
-            }]
-          });
-        }
-
-        const total = data.characters.length;
-        const fiveStars = data.characters.filter(c => c.stars === 5);
-        const fourStars = data.characters.filter(c => c.stars === 4);
-
-        const charCounts = {};
-        for (const c of data.characters) {
-          if (!c || !c.name) continue;
-          if (!charCounts[c.name]) charCounts[c.name] = { ...c._doc, count: 0 };
-          charCounts[c.name].count++;
-        }
-
-        const sorted = Object.values(charCounts)
-          .filter(c => c && c.name && c.stars)
-          .sort((a, b) => {
-            if (b.stars !== a.stars) return b.stars - a.stars;
-            return a.name.localeCompare(b.name);
-          });
-
-        const shown = sorted.slice(0, 20);
-        const inventoryList = shown.length > 0
-          ? shown.map(c => {
-              const dupText = c.count > 1 ? ` ×${c.count}` : '';
-              return `${c.icon || '✨'} **${c.name}**${dupText} — ${c.element || '?'} ${'⭐'.repeat(c.stars)}`;
-            }).join('\n')
-          : 'No characters found — use **/pull** to get some!';
-
-        const moreText = sorted.length > 20 ? `\n*...and ${sorted.length - 20} more characters*` : '';
-        const lastChar = data.characters[data.characters.length - 1];
-
+      if (!data || data.characters.length === 0) {
         return interaction.editReply({
           embeds: [{
-            color: 0xFFD700,
-            author: { name: `📦 ${target.username}'s Inventory`, icon_url: target.displayAvatarURL() },
-            description: inventoryList + moreText,
-            thumbnail: { url: lastChar?.image || target.displayAvatarURL() },
-            fields: [
-              { name: '📊 Total Pulls', value: `${total}`, inline: true },
-              { name: '⭐ 5★ Characters', value: `${fiveStars.length}`, inline: true },
-              { name: '✨ 4★ Characters', value: `${fourStars.length}`, inline: true },
-              { name: '🎯 Unique Characters', value: `${sorted.length}`, inline: true },
-            ],
-            footer: { text: 'Keep pulling to grow your collection!' },
-            timestamp: new Date().toISOString()
+            color: 0x5865F2,
+            title: `📦 ${target.username}'s Inventory`,
+            description: target.id === interaction.user.id
+              ? "You haven't pulled any characters yet!\nUse **/pull** to start your collection! ✨"
+              : `${target.username} hasn't pulled any characters yet!`,
+            thumbnail: { url: target.displayAvatarURL({ size: 256 }) }
           }]
         });
-      } catch (err) {
-        console.error('❌ Inventory error:', err);
-        return interaction.editReply({ content: '❌ Failed to load inventory. Try again!' });
       }
+
+      const total = data.characters.length;
+      const fiveStars = data.characters.filter(c => c && c.stars === 5);
+      const fourStars = data.characters.filter(c => c && c.stars === 4);
+
+      const charCounts = {};
+      for (const c of data.characters) {
+        if (!c || !c.name || !c.stars) continue;
+        if (!charCounts[c.name]) {
+          charCounts[c.name] = {
+            name: c.name,
+            stars: c.stars,
+            element: c.element,
+            icon: c.icon,
+            image: c.image,
+            count: 0
+          };
+        }
+        charCounts[c.name].count++;
+      }
+
+      const sorted = Object.values(charCounts)
+        .sort((a, b) => {
+          if (b.stars !== a.stars) return b.stars - a.stars;
+          return a.name.localeCompare(b.name);
+        });
+
+      const shown = sorted.slice(0, 20);
+      const inventoryList = shown.length > 0
+        ? shown.map(c => {
+            const dupText = c.count > 1 ? ` ×${c.count}` : '';
+            return `${c.icon || '✨'} **${c.name}**${dupText} — ${c.element || '?'} ${'⭐'.repeat(c.stars)}`;
+          }).join('\n')
+        : 'Use **/pull** to start your collection! ✨';
+
+      const moreText = sorted.length > 20 ? `\n*...and ${sorted.length - 20} more characters*` : '';
+      const lastChar = [...data.characters].reverse().find(c => c && c.image);
+
+      return interaction.editReply({
+        embeds: [{
+          color: 0xFFD700,
+          author: { name: `📦 ${target.username}'s Inventory`, icon_url: target.displayAvatarURL() },
+          description: inventoryList + moreText,
+          thumbnail: { url: lastChar?.image || target.displayAvatarURL() },
+          fields: [
+            { name: '📊 Total Pulls', value: `${total}`, inline: true },
+            { name: '⭐ 5★ Characters', value: `${fiveStars.length}`, inline: true },
+            { name: '✨ 4★ Characters', value: `${fourStars.length}`, inline: true },
+            { name: '🎯 Unique Characters', value: `${sorted.length}`, inline: true },
+          ],
+          footer: { text: 'Keep pulling to grow your collection!' },
+          timestamp: new Date().toISOString()
+        }]
+      });
     }
 
   } catch (err) {
