@@ -40,6 +40,8 @@ const playerSchema = new mongoose.Schema({
   pity: { type: Number, default: 0 },
   guaranteed: { type: Boolean, default: false },
   lastDaily: { type: Date, default: null },
+  lastBuy: { type: Date, default: null },
+  boughtToday: { type: Number, default: 0 },
   characters: [
     {
       name: { type: String, required: true },
@@ -203,6 +205,7 @@ const chars = genshinCharacters.filter(c => {
 });
 
 const PULL_COST = 160; // primogems per pull
+const BUY_LIMIT = 20000; // daily primogem buy limit
 
 const roasts = [
   "you are the reason god created middle finger 💀",
@@ -272,6 +275,11 @@ const commands = [
   new SlashCommandBuilder().setName('love').setDescription('Check love compatibility ❤️')
     .addUserOption(o => o.setName('user1').setDescription('First user').setRequired(true))
     .addUserOption(o => o.setName('user2').setDescription('Second user').setRequired(true)),
+  new SlashCommandBuilder().setName('gift').setDescription('Gift Primogems to a user (Owner only) 🎁')
+    .addUserOption(o => o.setName('user').setDescription('User to gift to').setRequired(true))
+    .addIntegerOption(o => o.setName('amount').setDescription('Amount of Primogems').setRequired(true)),
+  new SlashCommandBuilder().setName('buy').setDescription('Buy Primogems (20k limit per 24h) 💳')
+    .addIntegerOption(o => o.setName('amount').setDescription('Amount to buy (max 20000 per day)').setRequired(true)),
 ];
 
 // ===== REGISTER COMMANDS =====
@@ -435,9 +443,8 @@ client.on('interactionCreate', async interaction => {
           description: [
             '> Buy Primogems to wish for characters!\n',
             '**Package 1** — 💎 60 Primogems → `Free (use /daily)`',
-            '**Package 2** — 💎 300 Primogems → `🎮 /gift300` *(Ask the bot owner!)*',
-            '**Package 3** — 💎 980 Primogems → `🎮 /gift980` *(Ask the bot owner!)*',
-            '**Package 4** — 💎 1600 Primogems → `🎮 /gift1600` *(Ask the bot owner!)*\n',
+            '**Package 2** — 💎 Up to 20,000 per day → `🎮 /buy <amount>`',
+            '**Package 3** — 💎 Unlimited → `🎮 /gift <@user> <amount>` *(Owner only)*\n',
             '> 💡 **1 Pull = 160 Primogems**',
             '> 💡 **10 Pulls = 1600 Primogems**',
             '> 💡 **Hard Pity = 90 Pulls**',
@@ -698,6 +705,121 @@ client.on('interactionCreate', async interaction => {
           title: `❤️ Love Meter`,
           description: `**${user1.username}** ❤️ **${user2.username}**\n\n**${percentage}% compatibility!**\n\n${message}`,
           thumbnail: { url: user1.displayAvatarURL({ size: 256 }) }
+        }]
+      });
+    }
+
+    if (name === 'gift') {
+      // Owner only check
+      if (!OWNERS.includes(interaction.user.id)) {
+        return interaction.reply({
+          embeds: [{
+            color: 0xFF5555,
+            title: '❌ Owner Only!',
+            description: 'Only the bot owner can use this command.',
+          }],
+          ephemeral: true
+        });
+      }
+
+      const target = interaction.options.getUser('user');
+      const amount = interaction.options.getInteger('amount');
+
+      if (amount <= 0) {
+        return interaction.reply({
+          embeds: [{
+            color: 0xFF5555,
+            title: '❌ Invalid Amount!',
+            description: 'Amount must be greater than 0.',
+          }],
+          ephemeral: true
+        });
+      }
+
+      await Player.findOneAndUpdate(
+        { userId: target.id },
+        { $setOnInsert: { username: target.username, primogems: 0, pity: 0, guaranteed: false, lastDaily: null, characters: [] } },
+        { upsert: true }
+      );
+
+      const updated = await Player.findOneAndUpdate(
+        { userId: target.id },
+        { $inc: { primogems: amount }, $set: { username: target.username } },
+        { new: true }
+      );
+
+      return interaction.reply({
+        embeds: [{
+          color: 0x00FF00,
+          title: '🎁 Primogems Gifted!',
+          description: `Successfully gifted **${amount} 💎 Primogems** to **${target.username}**!\n\n**Their New Balance:** ${updated.primogems} 💎`,
+          thumbnail: { url: target.displayAvatarURL() },
+        }]
+      });
+    }
+
+    if (name === 'buy') {
+      let player = await Player.findOneAndUpdate(
+        { userId: interaction.user.id },
+        { $setOnInsert: { username: interaction.user.username, primogems: 0, pity: 0, guaranteed: false, lastDaily: null, boughtToday: 0, lastBuy: null, characters: [] } },
+        { upsert: true, new: true }
+      );
+
+      const amount = interaction.options.getInteger('amount');
+
+      if (amount <= 0) {
+        return interaction.reply({
+          embeds: [{
+            color: 0xFF5555,
+            title: '❌ Invalid Amount!',
+            description: 'Amount must be greater than 0.',
+          }],
+          ephemeral: true
+        });
+      }
+
+      // Check daily limit
+      const now = new Date();
+      const lastBuy = player.lastBuy ? new Date(player.lastBuy) : null;
+      const hoursSince = lastBuy ? (now - lastBuy) / 1000 / 60 / 60 : 999;
+
+      // Reset counter if 24 hours have passed
+      let boughtToday = player.boughtToday || 0;
+      if (hoursSince >= 24) {
+        boughtToday = 0;
+      }
+
+      if (boughtToday + amount > BUY_LIMIT) {
+        const remaining = BUY_LIMIT - boughtToday;
+        return interaction.reply({
+          embeds: [{
+            color: 0xFF5555,
+            title: '❌ Daily Limit Exceeded!',
+            description: `You can only buy **${BUY_LIMIT} 💎** per 24 hours.\n\n**Already bought today:** ${boughtToday} 💎\n**You can still buy:** ${remaining} 💎\n\n**Next reset:** <t:${Math.floor((lastBuy.getTime() + 24 * 60 * 60 * 1000) / 1000)}:R>`,
+          }],
+          ephemeral: true
+        });
+      }
+
+      // Add primogems
+      const updated = await Player.findOneAndUpdate(
+        { userId: interaction.user.id },
+        { 
+          $inc: { primogems: amount, boughtToday: amount },
+          $set: { lastBuy: now, username: interaction.user.username }
+        },
+        { new: true }
+      );
+
+      const nextReset = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+      return interaction.reply({
+        embeds: [{
+          color: 0x00FF00,
+          title: '✅ Purchase Successful!',
+          description: `You bought **${amount} 💎 Primogems!**\n\n**New Balance:** ${updated.primogems} 💎\n**Bought Today:** ${updated.boughtToday} / ${BUY_LIMIT} 💎\n**Next Reset:** <t:${Math.floor(nextReset.getTime() / 1000)}:R>`,
+          thumbnail: { url: interaction.user.displayAvatarURL() },
+          footer: { text: 'Use /pull to wish for characters!' }
         }]
       });
     }
