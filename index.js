@@ -87,6 +87,7 @@ const genshinCharacters = [
   { name: 'Kate', stars: 4, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Diona.png' },
 
   // LIYUE 5★
+  { name: 'Zibai', stars: 5, element: 'Geo', icon: '🪨', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Xingqiu.png' },
   { name: 'Baizhu', stars: 5, element: 'Dendro', icon: '🌿', color: 0x86EFAC, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Baizhuer.png' },
   { name: 'Ganyu', stars: 5, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Ganyu.png' },
   { name: 'Hu Tao', stars: 5, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Hutao.png' },
@@ -109,8 +110,6 @@ const genshinCharacters = [
   { name: 'Yanfei', stars: 4, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Feiyan.png' },
   { name: 'Yaoyao', stars: 4, element: 'Dendro', icon: '🌿', color: 0x86EFAC, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Yaoyao.png' },
   { name: 'Yun Jin', stars: 4, element: 'Geo', icon: '🪨', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Yunjin.png' },
-  { name: 'Zibai', stars: 4, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Xingqiu.png' },
-
   // INAZUMA 5★
   { name: 'Arataki Itto', stars: 5, element: 'Geo', icon: '🪨', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Itto.png' },
   { name: 'Chiori', stars: 5, element: 'Geo', icon: '🪨', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Chiori.png' },
