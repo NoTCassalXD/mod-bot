@@ -67,27 +67,26 @@ const genshinCharacters = [
   { name: 'Jean', stars: 5, element: 'Anemo', icon: '🌀', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Jean.png' },
   { name: 'Klee', stars: 5, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Klee.png' },
   { name: 'Mona', stars: 5, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Mona.png' },
-  { name: 'Varka', stars: 5, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Varka.png' },
+  { name: 'Varka', stars: 5, element: 'Anemo', icon: '🌀', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Varka.png' },
   { name: 'Venti', stars: 5, element: 'Anemo', icon: '🌀', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Venti.png' },
-  { name: 'Durin', stars: 5, element: 'Anemo', icon: '🌀', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Venti.png' },
+  { name: 'Durin', stars: 5, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Durin.png' },
+
   // MONDSTADT 4★
   { name: 'Amber', stars: 4, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Ambor.png' },
   { name: 'Barbara', stars: 4, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Barbara.png' },
   { name: 'Bennett', stars: 4, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Bennett.png' },
-  { name: 'Dahlia', stars: 4, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Barbara.png' },
-  { name: 'Diona', stars: 4, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Diona.png' },
+  { name: 'Dahlia', stars: 4, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Dahlia.png' },
+  { name: 'Diona', stars: 5, element: 'Cryo', icon: '❄️', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Diona.png' },
   { name: 'Fischl', stars: 4, element: 'Electro', icon: '⚡', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Fischl.png' },
-  { name: 'Kaeya', stars: 4, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Kaeya.png' },
-  { name: 'Lisa', stars: 4, element: 'Electro', icon: '⚡', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Lisa.png' },
+  { name: 'Kaeya', stars: 5, element: 'Cryo', icon: '❄️', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Kaeya.png' },
   { name: 'Mika', stars: 4, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Mika.png' },
-  { name: 'Noelle', stars: 4, element: 'Geo', icon: '🪨', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Noel.png' },
+  { name: 'Noelle', stars: 4, element: 'Geo', icon: '🪨', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Noelle.png' },
   { name: 'Razor', stars: 4, element: 'Electro', icon: '⚡', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Razor.png' },
   { name: 'Rosaria', stars: 4, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Rosaria.png' },
   { name: 'Sucrose', stars: 4, element: 'Anemo', icon: '🌀', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Sucrose.png' },
-  { name: 'Kate', stars: 4, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Diona.png' },
 
   // LIYUE 5★
-  { name: 'Zibai', stars: 5, element: 'Geo', icon: '🪨', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Xingqiu.png' },
+  { name: 'Zibai', stars: 5, element: 'Geo', icon: '🪨', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Zibai.png' },
   { name: 'Baizhu', stars: 5, element: 'Dendro', icon: '🌿', color: 0x86EFAC, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Baizhuer.png' },
   { name: 'Ganyu', stars: 5, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Ganyu.png' },
   { name: 'Hu Tao', stars: 5, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Hutao.png' },
@@ -98,6 +97,7 @@ const genshinCharacters = [
   { name: 'Xiao', stars: 5, element: 'Anemo', icon: '🌀', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Xiao.png' },
   { name: 'Yelan', stars: 5, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Yelan.png' },
   { name: 'Zhongli', stars: 5, element: 'Geo', icon: '🪨', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Zhongli.png' },
+  
   // LIYUE 4★
   { name: 'Beidou', stars: 4, element: 'Electro', icon: '⚡', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Beidou.png' },
   { name: 'Chongyun', stars: 4, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Chongyun.png' },
@@ -110,6 +110,7 @@ const genshinCharacters = [
   { name: 'Yanfei', stars: 4, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Feiyan.png' },
   { name: 'Yaoyao', stars: 4, element: 'Dendro', icon: '🌿', color: 0x86EFAC, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Yaoyao.png' },
   { name: 'Yun Jin', stars: 4, element: 'Geo', icon: '🪨', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Yunjin.png' },
+  
   // INAZUMA 5★
   { name: 'Arataki Itto', stars: 5, element: 'Geo', icon: '🪨', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Itto.png' },
   { name: 'Chiori', stars: 5, element: 'Geo', icon: '🪨', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Chiori.png' },
@@ -121,6 +122,7 @@ const genshinCharacters = [
   { name: 'Yae Miko', stars: 5, element: 'Electro', icon: '⚡', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Yae.png' },
   { name: 'Yoimiya', stars: 5, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Yoimiya.png' },
   { name: 'Yumemizuki Mizuki', stars: 5, element: 'Anemo', icon: '🌀', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Mizuki.png' },
+  
   // INAZUMA 4★
   { name: 'Gorou', stars: 4, element: 'Geo', icon: '🪨', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Gorou.png' },
   { name: 'Kujou Sara', stars: 4, element: 'Electro', icon: '⚡', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Sara.png' },
@@ -138,6 +140,7 @@ const genshinCharacters = [
   { name: 'Nilou', stars: 5, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Nilou.png' },
   { name: 'Tighnari', stars: 5, element: 'Dendro', icon: '🌿', color: 0x86EFAC, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Tighnari.png' },
   { name: 'Wanderer', stars: 5, element: 'Anemo', icon: '🌀', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Wanderer.png' },
+  
   // SUMERU 4★
   { name: 'Candace', stars: 4, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Candace.png' },
   { name: 'Collei', stars: 4, element: 'Dendro', icon: '🌿', color: 0x86EFAC, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Collei.png' },
@@ -158,6 +161,7 @@ const genshinCharacters = [
   { name: 'Neuvillette', stars: 5, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Neuvillette.png' },
   { name: 'Sigewinne', stars: 5, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Sigewinne.png' },
   { name: 'Wriothesley', stars: 5, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Wriothesley.png' },
+  
   // FONTAINE 4★
   { name: 'Charlotte', stars: 4, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Charlotte.png' },
   { name: 'Chevreuse', stars: 4, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Chevreuse.png' },
@@ -170,25 +174,27 @@ const genshinCharacters = [
   { name: 'Kinich', stars: 5, element: 'Dendro', icon: '🌿', color: 0x86EFAC, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Kinich.png' },
   { name: 'Mavuika', stars: 5, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Mavuika.png' },
   { name: 'Mualani', stars: 5, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Mualani.png' },
-  { name: 'Nefer', stars: 5, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Mavuika.png' },
   { name: 'Xilonen', stars: 5, element: 'Geo', icon: '🪨', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Xilonen.png' },
   { name: 'Varesa', stars: 5, element: 'Electro', icon: '⚡', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Varesa.png' },
+
   // NATLAN 4★
   { name: 'Iansan', stars: 4, element: 'Electro', icon: '⚡', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Iansan.png' },
-  { name: 'Ifa', stars: 4, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Sigewinne.png' },
+  { name: 'Ifa', stars: 4, element: 'Anemo', icon: '🌀', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Ifa.png' },
   { name: 'Kachina', stars: 4, element: 'Geo', icon: '🪨', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Kachina.png' },
   { name: 'Ororon', stars: 4, element: 'Electro', icon: '⚡', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Ororon.png' },
 
   // NOD-KRAI 5★
-  { name: 'Columbina', stars: 5, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Citlali.png' },
-  { name: 'Flins', stars: 5, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Sigewinne.png' },
-  { name: 'Ineffa', stars: 5, element: 'Dendro', icon: '🌿', color: 0x86EFAC, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Nahida.png' },
-  { name: 'Lauma', stars: 5, element: 'Dendro', icon: '🌿', color: 0x86EFAC, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Nahida.png' },
-  { name: 'Linnea', stars: 5, element: 'Anemo', icon: '🌀', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Jean.png' },
+  { name: 'Columbina', stars: 5, element: 'Hydro', icon: '💧', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Columbina.png' },
+  { name: 'Flins', stars: 5, element: 'Electro', icon: '⚡', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Flins.png' },
+  { name: 'Ineffa', stars: 5, element: 'Electro', icon: '⚡', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Ineffa.png' },
+  { name: 'Lauma', stars: 5, element: 'Dendro', icon: '🌿', color: 0x86EFAC, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Lauma.png' },
+  { name: 'Linnea', stars: 5, element: 'Geo', icon: '🪨', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Linnea.png' },
+  { name: 'Nefer', stars: 5, element: 'Dendro', icon: '🌿', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Nefer.png' },
+
   // NOD-KRAI 4★
-  { name: 'Aino', stars: 4, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Diona.png' },
-  { name: 'Illuga', stars: 4, element: 'Geo', icon: '🪨', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Noelle.png' },
-  { name: 'Jahoda', stars: 4, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Bennett.png' },
+  { name: 'Aino', stars: 4, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Aino.png' },
+  { name: 'Illuga', stars: 4, element: 'Geo', icon: '🪨', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Illuga.png' },
+  { name: 'Jahoda', stars: 4, element: 'Anemo', icon: '🌀', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Jahoda.png' },
 
   // INDEPENDENT
   { name: 'Skirk', stars: 5, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Skirk.png' },
