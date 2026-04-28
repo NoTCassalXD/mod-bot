@@ -187,14 +187,18 @@ const genshinCharacters = [
   { name: 'Tartaglia', stars: 5, element: 'Hydro', icon: 'https://enka.network/ui/UI_AvatarIcon_Tartaglia.png', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Tartaglia.png' },
 ];
 
+// Remove duplicates properly
+const uniqueChars = [];
 const seenNames = new Set();
-const chars = genshinCharacters.filter(c => {
-  if (seenNames.has(c.name)) return false;
-  seenNames.add(c.name);
-  return true;
-});
 
-// Sorted alphabetically for character list
+for (const char of genshinCharacters) {
+  if (!seenNames.has(char.name)) {
+    uniqueChars.push(char);
+    seenNames.add(char.name);
+  }
+}
+
+const chars = uniqueChars;
 const sortedChars = [...chars].sort((a, b) => a.name.localeCompare(b.name));
 
 const PULL_COST = 160;
@@ -257,27 +261,43 @@ function buildCharListEmbed(page) {
 
   const formatCol = (arr) => {
     if (arr.length === 0) return '\u200b';
+    return arr.map(c => `${c.name}`).join('\n');
+  };
+
+  const endIndex = Math.min(start + CHARS_PER_PAGE, sortedChars.length);
+
+  return {
+    color: 0x5865F2,
+    title: `🗺️ Genshin Impact Characters (${start + 1}–${endIndex}/${sortedChars.length})`,
+    fields: [
+      { name: `⌁ ${getRange(col1)}`, value: formatCol(col1), inline: true },
+      { name: `꩜ ${getRange(col2)}`, value: formatCol(col2) || '\u200b', inline: true },
+      { name: `꩜ ${getRange(col3)}`, value: formatCol(col3) || '\u200b', inline: true },
+    ],
+    footer: { text: `Use /pull to wish for these characters! • Page ${page}/${totalPages}` },
+    timestamp: new Date().toISOString()
+  };
+}
+  const pageChars = sortedChars.slice(start, start + CHARS_PER_PAGE);
+
+  const col1 = pageChars.slice(0, 20);
+  const col2 = pageChars.slice(20, 40);
+  const col3 = pageChars.slice(40, 60);
+
+  const getRange = (arr) => {
+    if (arr.length === 0) return '';
+    const first = arr[0].name[0].toUpperCase();
+    const last = arr[arr.length - 1].name[0].toUpperCase();
+    return first === last ? `(${first})` : `(${first}–${last})`;
+  };
+
+  const formatCol = (arr) => {
+    if (arr.length === 0) return '\u200b';
     return arr.map(c => {
       return `[${c.name}](${c.icon})`;
     }).join('\n');
   };
 
-  const endIndex = Math.min(start + CHARS_PER_PAGE, sortedChars.length);
-
-  const embed = new EmbedBuilder()
-    .setColor(0x5865F2)
-    .setTitle(`📋 Genshin Impact Character Guides (${start + 1}–${endIndex}/${sortedChars.length})`)
-    .setThumbnail('https://enka.network/ui/UI_AvatarIcon_Albedo.png')
-    .addFields(
-      { name: `👥 ${getRange(col1)}`, value: formatCol(col1), inline: true },
-      { name: `👥 ${getRange(col2)}`, value: formatCol(col2) || '\u200b', inline: true },
-      { name: `👥 ${getRange(col3)}`, value: formatCol(col3) || '\u200b', inline: true }
-    )
-    .setFooter({ text: `Use /guide <character> for full guide! • Page ${page}/${totalPages}` })
-    .setTimestamp();
-
-  return embed;
-}
 
 // ===== BUILD PAGE BUTTONS (with first/last) =====
 function buildCharListButtons(page) {
