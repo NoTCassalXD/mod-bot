@@ -254,10 +254,13 @@ function buildCharListEmbed(page) {
     return first === last ? `(${first})` : `(${first}–${last})`;
   };
 
-  const formatCol = (arr) => {
-    if (arr.length === 0) return '\u200b';
-    return arr.map(c => `${c.icon} ${c.name}`).join('\n');
-  };
+const formatCol = (arr) => {
+  if (arr.length === 0) return '\u200b';
+
+  return arr.map(c => {
+    return `${c.icon} **${c.name}**\n[🔗 View Image](${c.image})`;
+  }).join('\n\n');
+};
 
   const endIndex = Math.min(start + CHARS_PER_PAGE, sortedChars.length);
 
