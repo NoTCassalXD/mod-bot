@@ -27,12 +27,10 @@ const TOKEN = process.env.TOKEN;
 const CLIENT_ID = process.env.CLIENT_ID;
 const MONGODB_URI = process.env.MONGODB_URI;
 
-// ===== MONGODB =====
 mongoose.connect(MONGODB_URI)
   .then(() => console.log('✅ Connected to MongoDB!'))
   .catch(err => console.error('❌ MongoDB connection error:', err));
 
-// ===== PLAYER SCHEMA =====
 const playerSchema = new mongoose.Schema({
   userId: { type: String, required: true, unique: true },
   username: { type: String },
@@ -181,23 +179,26 @@ const genshinCharacters = [
   { name: 'Linnea', stars: 5, element: 'Geo', icon: '🪨', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Navia.png' },
   // NOD-KRAI 4★
   { name: 'Aino', stars: 4, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Barbara.png' },
-  { name: 'Illuga', stars: 4, element: 'Geo', icon: '🪨', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Noelle.png' },
+  { name: 'Illuga', stars: 4, element: 'Geo', icon: '🪨', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Noel.png' },
   { name: 'Jahoda', stars: 4, element: 'Anemo', icon: '🌀', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Sucrose.png' },
   // INDEPENDENT
   { name: 'Skirk', stars: 5, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Eula.png' },
   { name: 'Tartaglia', stars: 5, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Tartaglia.png' },
 ];
 
-// Remove duplicates
-const seen = new Set();
+const seenNames = new Set();
 const chars = genshinCharacters.filter(c => {
-  if (seen.has(c.name)) return false;
-  seen.add(c.name);
+  if (seenNames.has(c.name)) return false;
+  seenNames.add(c.name);
   return true;
 });
 
+// Sorted alphabetically for character list
+const sortedChars = [...chars].sort((a, b) => a.name.localeCompare(b.name));
+
 const PULL_COST = 160;
 const BUY_LIMIT = 20000;
+const CHARS_PER_PAGE = 60; // 3 columns x 20 rows
 
 const roasts = [
   "you are the reason god created middle finger 💀",
@@ -236,6 +237,113 @@ function doWish(player) {
   return { char, is5Star };
 }
 
+// ===== BUILD CHARACTER LIST EMBED =====
+function buildCharListEmbed(page) {
+  const totalPages = Math.ceil(sortedChars.length / CHARS_PER_PAGE);
+  const start = (page - 1) * CHARS_PER_PAGE;
+  const pageChars = sortedChars.slice(start, start + CHARS_PER_PAGE);
+
+  const col1 = pageChars.slice(0, 20);
+  const col2 = pageChars.slice(20, 40);
+  const col3 = pageChars.slice(40, 60);
+
+  const getRange = (arr) => {
+    if (arr.length === 0) return '';
+    const first = arr[0].name[0].toUpperCase();
+    const last = arr[arr.length - 1].name[0].toUpperCase();
+    return first === last ? `(${first})` : `(${first}–${last})`;
+  };
+
+  const formatCol = (arr) => {
+    if (arr.length === 0) return '\u200b';
+    return arr.map(c => `${c.icon} ${c.name}`).join('\n');
+  };
+
+  const endIndex = Math.min(start + CHARS_PER_PAGE, sortedChars.length);
+
+  return {
+    color: 0x5865F2,
+    title: `🗺️ Genshin Impact Characters (${start + 1}–${endIndex}/${sortedChars.length})`,
+    fields: [
+      { name: `꩜ ${getRange(col1)}`, value: formatCol(col1), inline: true },
+      { name: `꩜ ${getRange(col2)}`, value: formatCol(col2) || '\u200b', inline: true },
+      { name: `꩜ ${getRange(col3)}`, value: formatCol(col3) || '\u200b', inline: true },
+    ],
+    footer: { text: `Use /pull to wish for these characters! • Page ${page}/${totalPages}` },
+    timestamp: new Date().toISOString()
+  };
+}
+
+// ===== BUILD INVENTORY EMBED =====
+function buildInventoryEmbed(target, data, page, totalPages) {
+  const total = data.characters.length;
+  const fiveStars = data.characters.filter(c => c && c.stars === 5).length;
+  const fourStars = data.characters.filter(c => c && c.stars === 4).length;
+
+  const charCounts = {};
+  for (const c of data.characters) {
+    if (!c || !c.name || !c.stars) continue;
+    if (!charCounts[c.name]) charCounts[c.name] = { name: c.name, stars: c.stars, element: c.element, icon: c.icon, image: c.image, count: 0 };
+    charCounts[c.name].count++;
+  }
+
+  const sorted = Object.values(charCounts).sort((a, b) => {
+    if (b.stars !== a.stars) return b.stars - a.stars;
+    return a.name.localeCompare(b.name);
+  });
+
+  const perPage = 10;
+  const start = (page - 1) * perPage;
+  const shown = sorted.slice(start, start + perPage);
+  const highlightChar = shown.find(c => c.stars === 5) || shown[0];
+
+  const inventoryList = shown.length > 0
+    ? shown.map(c => {
+        const dupText = c.count > 1 ? ` ×${c.count}` : '';
+        const star = c.stars === 5 ? '🌟' : '✨';
+        return `${star} ${c.icon} **${c.name}**${dupText} — ${c.element} ${'⭐'.repeat(c.stars)}`;
+      }).join('\n')
+    : 'No characters on this page.';
+
+  return {
+    color: highlightChar?.stars === 5 ? 0xFFD700 : 0x5865F2,
+    author: { name: `📦 ${target.username}'s Collection`, icon_url: target.displayAvatarURL() },
+    description: inventoryList,
+    thumbnail: { url: highlightChar?.image || target.displayAvatarURL() },
+    fields: [
+      { name: '📊 Total Pulls', value: `${total}`, inline: true },
+      { name: '🌟 5★', value: `${fiveStars}`, inline: true },
+      { name: '✨ 4★', value: `${fourStars}`, inline: true },
+      { name: '🎯 Unique', value: `${sorted.length}`, inline: true },
+      { name: '📄 Page', value: `${page} / ${totalPages}`, inline: true },
+    ],
+    footer: { text: '🎰 Keep pulling to grow your collection!' },
+    timestamp: new Date().toISOString()
+  };
+}
+
+// ===== BUILD PAGE BUTTONS (with first/last) =====
+function buildCharListButtons(page) {
+  const totalPages = Math.ceil(sortedChars.length / CHARS_PER_PAGE);
+  return new ActionRowBuilder().addComponents(
+    new ButtonBuilder().setCustomId(`cl_first_1`).setLabel('|◀◀').setStyle(ButtonStyle.Primary).setDisabled(page <= 1),
+    new ButtonBuilder().setCustomId(`cl_prev_${page - 1}`).setLabel('◀').setStyle(ButtonStyle.Primary).setDisabled(page <= 1),
+    new ButtonBuilder().setCustomId(`cl_cur_${page}`).setLabel(`${page}/${totalPages}`).setStyle(ButtonStyle.Secondary).setDisabled(true),
+    new ButtonBuilder().setCustomId(`cl_next_${page + 1}`).setLabel('▶').setStyle(ButtonStyle.Primary).setDisabled(page >= totalPages),
+    new ButtonBuilder().setCustomId(`cl_last_${totalPages}`).setLabel('▶▶|').setStyle(ButtonStyle.Primary).setDisabled(page >= totalPages),
+  );
+}
+
+function buildInvButtons(userId, page, totalPages) {
+  return new ActionRowBuilder().addComponents(
+    new ButtonBuilder().setCustomId(`inv_${userId}_1`).setLabel('|◀◀').setStyle(ButtonStyle.Primary).setDisabled(page <= 1),
+    new ButtonBuilder().setCustomId(`inv_${userId}_${page - 1}`).setLabel('◀').setStyle(ButtonStyle.Primary).setDisabled(page <= 1),
+    new ButtonBuilder().setCustomId(`inv_cur_${page}`).setLabel(`${page}/${totalPages}`).setStyle(ButtonStyle.Secondary).setDisabled(true),
+    new ButtonBuilder().setCustomId(`inv_${userId}_${page + 1}`).setLabel('▶').setStyle(ButtonStyle.Primary).setDisabled(page >= totalPages),
+    new ButtonBuilder().setCustomId(`inv_${userId}_${totalPages}`).setLabel('▶▶|').setStyle(ButtonStyle.Primary).setDisabled(page >= totalPages),
+  );
+}
+
 // ===== COMMANDS =====
 const commands = [
   new SlashCommandBuilder().setName('pull').setDescription('Pull a Genshin character (costs 160 💎)'),
@@ -251,7 +359,7 @@ const commands = [
     .addIntegerOption(o => o.setName('amount').setDescription('Amount of Primogems').setRequired(true)),
   new SlashCommandBuilder().setName('inventory').setDescription('View your pulled Genshin characters 📦')
     .addUserOption(o => o.setName('user').setDescription("View another user's inventory")),
-  new SlashCommandBuilder().setName('character-list').setDescription('View all available Genshin characters 📋'),
+  new SlashCommandBuilder().setName('character-list').setDescription('View all available Genshin Impact characters 📋'),
   new SlashCommandBuilder().setName('avatar').setDescription("Show a user's avatar")
     .addUserOption(o => o.setName('user').setDescription('User (leave empty for yourself)')),
   new SlashCommandBuilder().setName('coinflip').setDescription('Flip a coin'),
@@ -280,115 +388,27 @@ client.once('ready', async () => {
   }
 });
 
-// ===== BUILD CHARACTER LIST PAGE =====
-function buildCharListEmbed(page, totalPages) {
-  const sorted = [...chars].sort((a, b) => a.name.localeCompare(b.name));
-  const perPage = 60;
-  const start = (page - 1) * perPage;
-  const pageChars = sorted.slice(start, start + perPage);
-
-  // Split into 3 columns of 20
-  const col1 = pageChars.slice(0, 20);
-  const col2 = pageChars.slice(20, 40);
-  const col3 = pageChars.slice(40, 60);
-
-  const formatCol = (arr) => arr.map(c => `${c.icon} ${c.name} ${'⭐'.repeat(c.stars)}`).join('\n') || '\u200b';
-
-  const startLetter = pageChars[0]?.name[0] || '';
-  const endLetter = pageChars[pageChars.length - 1]?.name[0] || '';
-
-  return {
-    color: 0x5865F2,
-    title: `📋 Genshin Impact Characters (${start + 1}-${Math.min(start + perPage, sorted.length)} / ${sorted.length})`,
-    description: `**Page ${page}/${totalPages}** — Characters ${startLetter}–${endLetter}\nTotal: **${chars.filter(c => c.stars === 5).length} ⭐5★** | **${chars.filter(c => c.stars === 4).length} ✨4★**`,
-    fields: [
-      { name: `(${startLetter}–${col1[col1.length - 1]?.name[0] || ''})`, value: formatCol(col1), inline: true },
-      { name: col2.length > 0 ? `(${col2[0].name[0]}–${col2[col2.length - 1].name[0]})` : '\u200b', value: formatCol(col2), inline: true },
-      { name: col3.length > 0 ? `(${col3[0].name[0]}–${col3[col3.length - 1].name[0]})` : '\u200b', value: formatCol(col3), inline: true },
-    ],
-    footer: { text: 'Use /pull to wish for these characters!' },
-    timestamp: new Date().toISOString()
-  };
-}
-
-// ===== BUILD INVENTORY EMBED =====
-function buildInventoryEmbed(target, data, page, totalPages) {
-  const total = data.characters.length;
-  const fiveStars = data.characters.filter(c => c && c.stars === 5).length;
-  const fourStars = data.characters.filter(c => c && c.stars === 4).length;
-
-  const charCounts = {};
-  for (const c of data.characters) {
-    if (!c || !c.name || !c.stars) continue;
-    if (!charCounts[c.name]) charCounts[c.name] = { name: c.name, stars: c.stars, element: c.element, icon: c.icon, image: c.image, count: 0 };
-    charCounts[c.name].count++;
-  }
-
-  const sorted = Object.values(charCounts).sort((a, b) => {
-    if (b.stars !== a.stars) return b.stars - a.stars;
-    return a.name.localeCompare(b.name);
-  });
-
-  const perPage = 10;
-  const start = (page - 1) * perPage;
-  const shown = sorted.slice(start, start + perPage);
-
-  // Get the highlighted character for this page (first 5★ or first char)
-  const highlightChar = shown.find(c => c.stars === 5) || shown[0];
-
-  const inventoryList = shown.length > 0
-    ? shown.map(c => {
-        const dupText = c.count > 1 ? ` ×${c.count}` : '';
-        const star = c.stars === 5 ? '🌟' : '✨';
-        return `${star} ${c.icon} **${c.name}**${dupText}\n╰ ${c.element} ${'⭐'.repeat(c.stars)}`;
-      }).join('\n')
-    : 'No characters on this page.';
-
-  return {
-    color: highlightChar?.stars === 5 ? 0xFFD700 : 0x5865F2,
-    author: { name: `📦 ${target.username}'s Collection`, icon_url: target.displayAvatarURL() },
-    description: inventoryList,
-    thumbnail: { url: highlightChar?.image || target.displayAvatarURL() },
-    fields: [
-      { name: '📊 Total Pulls', value: `${total}`, inline: true },
-      { name: '🌟 5★', value: `${fiveStars}`, inline: true },
-      { name: '✨ 4★', value: `${fourStars}`, inline: true },
-      { name: '🎯 Unique', value: `${sorted.length}`, inline: true },
-      { name: '📄 Page', value: `${page} / ${totalPages}`, inline: true },
-    ],
-    footer: { text: '🎰 Keep pulling to grow your collection!' },
-    timestamp: new Date().toISOString()
-  };
-}
-
-// ===== PAGE BUTTONS =====
-function buildPageButtons(prefix, userId, page, totalPages) {
-  return new ActionRowBuilder().addComponents(
-    new ButtonBuilder()
-      .setCustomId(`${prefix}_${userId}_${page - 1}`)
-      .setLabel('◀ Prev')
-      .setStyle(ButtonStyle.Secondary)
-      .setDisabled(page <= 1),
-    new ButtonBuilder()
-      .setCustomId(`${prefix}_${userId}_${page + 1}`)
-      .setLabel('Next ▶')
-      .setStyle(ButtonStyle.Secondary)
-      .setDisabled(page >= totalPages),
-  );
-}
-
 // ===== INTERACTIONS =====
 client.on('interactionCreate', async interaction => {
 
   // ===== BUTTON HANDLER =====
   if (interaction.isButton()) {
     const parts = interaction.customId.split('_');
-    const action = parts[0];
-    const userId = parts[1];
-    const page = parseInt(parts[2]);
 
-    // Inventory pages
-    if (action === 'inv') {
+    // Character list buttons
+    if (parts[0] === 'cl') {
+      const page = parseInt(parts[2]);
+      const totalPages = Math.ceil(sortedChars.length / CHARS_PER_PAGE);
+      const clampedPage = Math.max(1, Math.min(page, totalPages));
+      const embed = buildCharListEmbed(clampedPage);
+      const row = buildCharListButtons(clampedPage);
+      return interaction.update({ embeds: [embed], components: [row] });
+    }
+
+    // Inventory buttons
+    if (parts[0] === 'inv' && parts[1] !== 'cur') {
+      const userId = parts[1];
+      const page = parseInt(parts[2]);
       const target = await client.users.fetch(userId).catch(() => null);
       if (!target) return interaction.reply({ content: '❌ User not found.', ephemeral: true });
 
@@ -400,7 +420,7 @@ client.on('interactionCreate', async interaction => {
       const charCounts = {};
       for (const c of data.characters) {
         if (!c || !c.name || !c.stars) continue;
-        if (!charCounts[c.name]) charCounts[c.name] = { ...c.toObject(), count: 0 };
+        if (!charCounts[c.name]) charCounts[c.name] = { name: c.name, stars: c.stars, element: c.element, icon: c.icon, image: c.image, count: 0 };
         charCounts[c.name].count++;
       }
       const sorted = Object.values(charCounts);
@@ -408,17 +428,7 @@ client.on('interactionCreate', async interaction => {
       const clampedPage = Math.max(1, Math.min(page, totalPages));
 
       const embed = buildInventoryEmbed(target, data, clampedPage, totalPages);
-      const row = buildPageButtons('inv', userId, clampedPage, totalPages);
-      return interaction.update({ embeds: [embed], components: [row] });
-    }
-
-    // Character list pages
-    if (action === 'cl') {
-      const sorted = [...chars].sort((a, b) => a.name.localeCompare(b.name));
-      const totalPages = Math.ceil(sorted.length / 60);
-      const clampedPage = Math.max(1, Math.min(page, totalPages));
-      const embed = buildCharListEmbed(clampedPage, totalPages);
-      const row = buildPageButtons('cl', userId, clampedPage, totalPages);
+      const row = buildInvButtons(userId, clampedPage, totalPages);
       return interaction.update({ embeds: [embed], components: [row] });
     }
 
@@ -432,10 +442,10 @@ client.on('interactionCreate', async interaction => {
 
     // ===== CHARACTER LIST =====
     if (name === 'character-list') {
-      const totalPages = Math.ceil(chars.length / 60);
-      const embed = buildCharListEmbed(1, totalPages);
-      const row = buildPageButtons('cl', interaction.user.id, 1, totalPages);
-      return interaction.reply({ embeds: [embed], components: totalPages > 1 ? [row] : [] });
+      const totalPages = Math.ceil(sortedChars.length / CHARS_PER_PAGE);
+      const embed = buildCharListEmbed(1);
+      const row = buildCharListButtons(1);
+      return interaction.reply({ embeds: [embed], components: [row] });
     }
 
     // ===== DAILY =====
@@ -452,7 +462,7 @@ client.on('interactionCreate', async interaction => {
         const nextDaily = new Date(last.getTime() + 24 * 60 * 60 * 1000);
         const timeLeft = Math.ceil((nextDaily - now) / 1000 / 60 / 60);
         return interaction.reply({
-          embeds: [{ color: 0xFF5555, title: '⏰ Already Claimed!', description: `Come back in **${timeLeft} hour(s)**. ⏳` }]
+          embeds: [{ color: 0xFF5555, title: '⏰ Already Claimed!', description: `Come back in **${timeLeft} hour(s)**. ⏳\n\nNext reset: <t:${Math.floor(nextDaily.getTime() / 1000)}:R>` }]
         });
       }
       await Player.findOneAndUpdate(
@@ -480,7 +490,7 @@ client.on('interactionCreate', async interaction => {
         embeds: [{
           color: 0x5865F2,
           title: `💰 ${interaction.user.username}'s Balance`,
-          description: `**💎 Primogems:** ${primos}\n**✨ Pulls Available:** ${pulls}\n\nEarn more with **/daily** or buy in **/shop**!`,
+          description: `**💎 Primogems:** ${primos}\n**✨ Pulls Available:** ${pulls}\n\nEarn more with **/daily** or **/buy**!`,
           thumbnail: { url: interaction.user.displayAvatarURL() },
         }]
       });
@@ -494,7 +504,7 @@ client.on('interactionCreate', async interaction => {
           title: '🛒 Primogem Shop',
           description: [
             '> Buy Primogems to wish for characters!\n',
-            '**🆓 Free** — 💎 60 Primogems → `/daily` (every 24h)',
+            '**🆓 Free** — 💎 60 Primogems → `/daily` *(every 24h)*',
             '**💳 Buy** — 💎 Up to 20,000 per day → `/buy <amount>`',
             '**🎁 Gift** — 💎 Unlimited → `/gift @user <amount>` *(Owner only)*\n',
             '> 💡 **1 Pull = 160 Primogems**',
@@ -551,13 +561,12 @@ client.on('interactionCreate', async interaction => {
         }
       );
       const updatedPlayer = await Player.findOne({ userId: interaction.user.id });
-      const stars = '⭐'.repeat(char.stars);
       return interaction.reply({
         embeds: [{
           color: char.color,
           author: { name: '✨ Genshin Impact — Wish Result' },
           title: `${char.icon} ${char.name}`,
-          description: `**Element:** ${char.element}\n**Rarity:** ${stars}\n\n${is5Star ? '🎉 **RARE 5★ PULL! You got lucky!**' : '💫 A fine addition to your roster!'}\n\n💎 **Remaining:** ${updatedPlayer.primogems} | 🎯 **Pity:** ${updatedPlayer.pity}/90`,
+          description: `**Element:** ${char.element}\n**Rarity:** ${'⭐'.repeat(char.stars)}\n\n${is5Star ? '🎉 **RARE 5★ PULL! You got lucky!**' : '💫 A fine addition to your roster!'}\n\n💎 **Remaining:** ${updatedPlayer.primogems} | 🎯 **Pity:** ${updatedPlayer.pity}/90`,
           image: { url: char.image },
           footer: { text: is5Star ? '✦ 5★ Character Obtained!' : '✦ 4★ Character Obtained! | Added to /inventory' },
           timestamp: new Date().toISOString()
@@ -597,29 +606,32 @@ client.on('interactionCreate', async interaction => {
       );
 
       const updatedPlayer = await Player.findOne({ userId: interaction.user.id });
-      const fiveStarResult = results.find(r => r.is5Star);
-      const featuredChar = fiveStarResult?.char || results[0].char;
+      const fiveStarResults = results.filter(r => r.is5Star);
+      const featuredChar = fiveStarResults.length > 0 ? fiveStarResults[0].char : results[0].char;
 
-      // Build the pull results list
-      const pullList = results.map((r, i) => {
-        const star = r.is5Star ? '🌟' : '✨';
-        const highlight = r.is5Star ? `**${r.char.name}**` : r.char.name;
-        return `${star} ${r.char.icon} ${highlight} ${'⭐'.repeat(r.char.stars)} — ${r.char.element}`;
+      // Build the pull list — 5★ highlighted
+      const pullList = results.map(r => {
+        if (r.is5Star) {
+          return `✦ ${r.char.icon} **${r.char.name}** ⭐⭐⭐⭐⭐ — ${r.char.element} 🌟`;
+        }
+        return `${r.char.icon} ${r.char.name} ⭐⭐⭐⭐ — ${r.char.element}`;
       }).join('\n');
 
       return interaction.reply({
         embeds: [{
-          color: fiveStarResult ? 0xFFD700 : 0x5865F2,
-          author: { name: `✨ Genshin Impact — 10 Wish Results` },
-          title: fiveStarResult ? `🎉 GOT ${fiveStarResult.char.name.toUpperCase()}!` : '💫 10 Wishes Complete!',
+          color: fiveStarResults.length > 0 ? 0xFFD700 : 0x5865F2,
+          author: { name: `✨ Genshin Impact — 10 Wish Results`, icon_url: interaction.user.displayAvatarURL() },
+          title: fiveStarResults.length > 0
+            ? `🎉 ${fiveStarResults.map(r => r.char.name).join(', ')} obtained!`
+            : '💫 10 Wishes Complete!',
           description: pullList,
           thumbnail: { url: featuredChar.image },
           fields: [
             { name: '💎 Primogems Left', value: `${updatedPlayer.primogems}`, inline: true },
             { name: '🎯 Current Pity', value: `${updatedPlayer.pity}/90`, inline: true },
-            { name: '🌟 5★ This Pull', value: fiveStarResult ? `${fiveStarResult.char.icon} ${fiveStarResult.char.name}` : 'None this time...', inline: true },
+            { name: '🌟 5★ Obtained', value: fiveStarResults.length > 0 ? fiveStarResults.map(r => `${r.char.icon} ${r.char.name}`).join(', ') : 'None this time...', inline: true },
           ],
-          footer: { text: fiveStarResult ? `✦ ${fiveStarResult.char.name} added to your inventory!` : 'No 5★ this time... Keep wishing! (/pull10)' },
+          footer: { text: fiveStarResults.length > 0 ? `✦ Rare character(s) added to your inventory!` : 'No 5★ this time... Keep wishing! Use /pull10 again' },
           timestamp: new Date().toISOString()
         }]
       });
@@ -654,7 +666,7 @@ client.on('interactionCreate', async interaction => {
       const totalPages = Math.max(1, Math.ceil(sorted.length / 10));
 
       const embed = buildInventoryEmbed(target, data, 1, totalPages);
-      const row = buildPageButtons('inv', target.id, 1, totalPages);
+      const row = buildInvButtons(target.id, 1, totalPages);
       return interaction.editReply({ embeds: [embed], components: totalPages > 1 ? [row] : [] });
     }
 
@@ -740,7 +752,6 @@ client.on('interactionCreate', async interaction => {
     }
 
     if (name === 'coinflip') return interaction.reply(Math.random() < 0.5 ? '🪙 Heads!' : '🪙 Tails!');
-
     if (name === 'say') return interaction.reply(interaction.options.getString('text'));
 
     if (name === 'meme') {
