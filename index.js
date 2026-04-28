@@ -258,8 +258,8 @@ const formatCol = (arr) => {
   if (arr.length === 0) return '\u200b';
 
   return arr.map(c => {
-    return `${c.icon} **${c.name}**\n[🔗 View Image](${c.image})`;
-  }).join('\n\n');
+    return `${c.icon} ${c.name}`;
+  }).join('\n');
 };
 
   const endIndex = Math.min(start + CHARS_PER_PAGE, sortedChars.length);
@@ -268,7 +268,7 @@ const formatCol = (arr) => {
     color: 0x5865F2,
     title: `🗺️ Genshin Impact Characters (${start + 1}–${endIndex}/${sortedChars.length})`,
     fields: [
-      { name: `꩜ ${getRange(col1)}`, value: formatCol(col1), inline: true },
+      { name: `⌁ ${getRange(col1)}`, value: formatCol(col1), inline: true },
       { name: `꩜ ${getRange(col2)}`, value: formatCol(col2) || '\u200b', inline: true },
       { name: `꩜ ${getRange(col3)}`, value: formatCol(col3) || '\u200b', inline: true },
     ],
@@ -448,7 +448,8 @@ client.on('interactionCreate', async interaction => {
       const totalPages = Math.ceil(sortedChars.length / CHARS_PER_PAGE);
       const embed = buildCharListEmbed(1);
       const row = buildCharListButtons(1);
-      return interaction.reply({ embeds: [embed], components: [row] });
+      await interaction.deferReply();
+      return interaction.editReply({ embeds: [embed], components: [row] });
     }
 
     // ===== DAILY =====
