@@ -9,7 +9,7 @@ const {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
-  EmbedBuilder
+  EmbedBuilder,
 } = require('discord.js');
 
 const axios = require('axios');
@@ -56,7 +56,7 @@ const playerSchema = new mongoose.Schema({
 
 const Player = mongoose.model('Player', playerSchema);
 
-// ===== ALL GENSHIN CHARACTERS =====
+// ===== ALL GENSHIN CHARACTERS WITH REAL ICONS =====
 const genshinCharacters = [
   // MONDSTADT 5★
   { name: 'Albedo', stars: 5, element: 'Geo', icon: 'https://enka.network/ui/UI_AvatarIcon_Albedo.png', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Albedo.png' },
@@ -84,13 +84,13 @@ const genshinCharacters = [
   { name: 'Rosaria', stars: 4, element: 'Cryo', icon: 'https://enka.network/ui/UI_AvatarIcon_Rosaria.png', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Rosaria.png' },
   { name: 'Sucrose', stars: 4, element: 'Anemo', icon: 'https://enka.network/ui/UI_AvatarIcon_Sucrose.png', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Sucrose.png' },
   // LIYUE 5★
-  { name: 'Baizhu', stars: 5, element: 'Dendro', icon: 'https://enka.network/ui/UI_AvatarIcon_Baizhuer.png', color: 0x86EFAC, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Baizhuer.png' },
+  { name: 'Baizhu', stars: 5, element: 'Dendro', icon: 'https://enka.network/ui/UI_AvatarIcon_Baizhu.png', color: 0x86EFAC, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Baizhuer.png' },
   { name: 'Ganyu', stars: 5, element: 'Cryo', icon: 'https://enka.network/ui/UI_AvatarIcon_Ganyu.png', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Ganyu.png' },
   { name: 'Hu Tao', stars: 5, element: 'Pyro', icon: 'https://enka.network/ui/UI_AvatarIcon_Hutao.png', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Hutao.png' },
   { name: 'Keqing', stars: 5, element: 'Electro', icon: 'https://enka.network/ui/UI_AvatarIcon_Keqing.png', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Keqing.png' },
   { name: 'Qiqi', stars: 5, element: 'Cryo', icon: 'https://enka.network/ui/UI_AvatarIcon_Qiqi.png', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Qiqi.png' },
   { name: 'Shenhe', stars: 5, element: 'Cryo', icon: 'https://enka.network/ui/UI_AvatarIcon_Shenhe.png', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Shenhe.png' },
-  { name: 'Xianyun', stars: 5, element: 'Anemo', icon: 'https://enka.network/ui/UI_AvatarIcon_Liuyun.png', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Liuyun.png' },
+  { name: 'Xianyun', stars: 5, element: 'Anemo', icon: 'https://enka.network/ui/UI_AvatarIcon_Xianyun.png', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Liuyun.png' },
   { name: 'Xiao', stars: 5, element: 'Anemo', icon: 'https://enka.network/ui/UI_AvatarIcon_Xiao.png', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Xiao.png' },
   { name: 'Yelan', stars: 5, element: 'Hydro', icon: 'https://enka.network/ui/UI_AvatarIcon_Yelan.png', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Yelan.png' },
   { name: 'Zhongli', stars: 5, element: 'Geo', icon: 'https://enka.network/ui/UI_AvatarIcon_Zhongli.png', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Zhongli.png' },
@@ -242,7 +242,7 @@ function doWish(player) {
   return { char, is5Star };
 }
 
-// ===== BUILD CHARACTER LIST EMBED =====
+// ===== BUILD CHARACTER LIST EMBED WITH REAL ICONS =====
 function buildCharListEmbed(page) {
   const totalPages = Math.ceil(sortedChars.length / CHARS_PER_PAGE);
   const start = (page - 1) * CHARS_PER_PAGE;
@@ -261,14 +261,19 @@ function buildCharListEmbed(page) {
 
   const formatCol = (arr) => {
     if (arr.length === 0) return '\u200b';
-    return arr.map(c => `${c.name}`).join('\n');
+    return arr.map(c => {
+      return `${c.name}`;
+    }).join('\n');
   };
 
   const endIndex = Math.min(start + CHARS_PER_PAGE, sortedChars.length);
+  const highlightChar = pageChars[0];
 
   return {
     color: 0x5865F2,
-    title: `🗺️ Genshin Impact Characters (${start + 1}–${endIndex}/${sortedChars.length})`,
+    title: `🗺️ Genshin Impact Character Guides (${start + 1}–${endIndex}/${sortedChars.length})`,
+    description: '**Use /guide <character> to view a character guide!**',
+    thumbnail: { url: highlightChar?.image || 'https://enka.network/ui/UI_AvatarIcon_Albedo.png' },
     fields: [
       { name: `⌁ ${getRange(col1)}`, value: formatCol(col1), inline: true },
       { name: `꩜ ${getRange(col2)}`, value: formatCol(col2) || '\u200b', inline: true },
@@ -277,38 +282,6 @@ function buildCharListEmbed(page) {
     footer: { text: `Use /pull to wish for these characters! • Page ${page}/${totalPages}` },
     timestamp: new Date().toISOString()
   };
-}
-  const pageChars = sortedChars.slice(start, start + CHARS_PER_PAGE);
-
-  const col1 = pageChars.slice(0, 20);
-  const col2 = pageChars.slice(20, 40);
-  const col3 = pageChars.slice(40, 60);
-
-  const getRange = (arr) => {
-    if (arr.length === 0) return '';
-    const first = arr[0].name[0].toUpperCase();
-    const last = arr[arr.length - 1].name[0].toUpperCase();
-    return first === last ? `(${first})` : `(${first}–${last})`;
-  };
-
-  const formatCol = (arr) => {
-    if (arr.length === 0) return '\u200b';
-    return arr.map(c => {
-      return `[${c.name}](${c.icon})`;
-    }).join('\n');
-  };
-
-
-// ===== BUILD PAGE BUTTONS (with first/last) =====
-function buildCharListButtons(page) {
-  const totalPages = Math.ceil(sortedChars.length / CHARS_PER_PAGE);
-  return new ActionRowBuilder().addComponents(
-    new ButtonBuilder().setCustomId(`cl_first_1`).setLabel('|◀◀').setStyle(ButtonStyle.Primary).setDisabled(page <= 1),
-    new ButtonBuilder().setCustomId(`cl_prev_${page - 1}`).setLabel('◀').setStyle(ButtonStyle.Primary).setDisabled(page <= 1),
-    new ButtonBuilder().setCustomId(`cl_cur_${page}`).setLabel(`${page}/${totalPages}`).setStyle(ButtonStyle.Secondary).setDisabled(true),
-    new ButtonBuilder().setCustomId(`cl_next_${page + 1}`).setLabel('▶').setStyle(ButtonStyle.Primary).setDisabled(page >= totalPages),
-    new ButtonBuilder().setCustomId(`cl_last_${totalPages}`).setLabel('▶▶|').setStyle(ButtonStyle.Primary).setDisabled(page >= totalPages),
-  );
 }
 
 // ===== BUILD INVENTORY EMBED =====
@@ -342,22 +315,33 @@ function buildInventoryEmbed(target, data, page, totalPages) {
       }).join('\n')
     : 'No characters on this page.';
 
-  const embed = new EmbedBuilder()
-    .setColor(highlightChar?.stars === 5 ? 0xFFD700 : 0x5865F2)
-    .setAuthor({ name: `📦 ${target.username}'s Collection`, iconURL: target.displayAvatarURL() })
-    .setDescription(inventoryList)
-    .setThumbnail(highlightChar?.image || target.displayAvatarURL())
-    .addFields(
+  return {
+    color: highlightChar?.stars === 5 ? 0xFFD700 : 0x5865F2,
+    author: { name: `📦 ${target.username}'s Collection`, icon_url: target.displayAvatarURL() },
+    description: inventoryList,
+    thumbnail: { url: highlightChar?.image || target.displayAvatarURL() },
+    fields: [
       { name: '📊 Total Pulls', value: `${total}`, inline: true },
       { name: '🌟 5★', value: `${fiveStars}`, inline: true },
       { name: '✨ 4★', value: `${fourStars}`, inline: true },
       { name: '🎯 Unique', value: `${sorted.length}`, inline: true },
-      { name: '📄 Page', value: `${page} / ${totalPages}`, inline: true }
-    )
-    .setFooter({ text: '🎰 Keep pulling to grow your collection!' })
-    .setTimestamp();
+      { name: '📄 Page', value: `${page} / ${totalPages}`, inline: true },
+    ],
+    footer: { text: '🎰 Keep pulling to grow your collection!' },
+    timestamp: new Date().toISOString()
+  };
+}
 
-  return embed;
+// ===== BUILD PAGE BUTTONS (with first/last) =====
+function buildCharListButtons(page) {
+  const totalPages = Math.ceil(sortedChars.length / CHARS_PER_PAGE);
+  return new ActionRowBuilder().addComponents(
+    new ButtonBuilder().setCustomId(`cl_first_1`).setLabel('|◀◀').setStyle(ButtonStyle.Primary).setDisabled(page <= 1),
+    new ButtonBuilder().setCustomId(`cl_prev_${page - 1}`).setLabel('◀').setStyle(ButtonStyle.Primary).setDisabled(page <= 1),
+    new ButtonBuilder().setCustomId(`cl_cur_${page}`).setLabel(`${page}/${totalPages}`).setStyle(ButtonStyle.Secondary).setDisabled(true),
+    new ButtonBuilder().setCustomId(`cl_next_${page + 1}`).setLabel('▶').setStyle(ButtonStyle.Primary).setDisabled(page >= totalPages),
+    new ButtonBuilder().setCustomId(`cl_last_${totalPages}`).setLabel('▶▶|').setStyle(ButtonStyle.Primary).setDisabled(page >= totalPages),
+  );
 }
 
 function buildInvButtons(userId, page, totalPages) {
@@ -489,11 +473,7 @@ client.on('interactionCreate', async interaction => {
         const nextDaily = new Date(last.getTime() + 24 * 60 * 60 * 1000);
         const timeLeft = Math.ceil((nextDaily - now) / 1000 / 60 / 60);
         return interaction.reply({
-          embeds: [new EmbedBuilder()
-            .setColor(0xFF5555)
-            .setTitle('⏰ Already Claimed!')
-            .setDescription(`Come back in **${timeLeft} hour(s)**. ⏳\n\nNext reset: <t:${Math.floor(nextDaily.getTime() / 1000)}:R>`)
-          ]
+          embeds: [{ color: 0xFF5555, title: '⏰ Already Claimed!', description: `Come back in **${timeLeft} hour(s)**. ⏳\n\nNext reset: <t:${Math.floor(nextDaily.getTime() / 1000)}:R>` }]
         });
       }
       await Player.findOneAndUpdate(
@@ -502,13 +482,13 @@ client.on('interactionCreate', async interaction => {
       );
       const updated = await Player.findOne({ userId: interaction.user.id });
       return interaction.reply({
-        embeds: [new EmbedBuilder()
-          .setColor(0xFFD700)
-          .setTitle('💎 Daily Primogems Claimed!')
-          .setDescription(`You received **60 💎 Primogems!**\n\n**Total Balance:** ${updated.primogems} 💎\n\nCome back tomorrow for more! 🌟`)
-          .setThumbnail(interaction.user.displayAvatarURL())
-          .setFooter({ text: 'Tip: Use /pull to wish for characters!' })
-        ]
+        embeds: [{
+          color: 0xFFD700,
+          title: '💎 Daily Primogems Claimed!',
+          description: `You received **60 💎 Primogems!**\n\n**Total Balance:** ${updated.primogems} 💎\n\nCome back tomorrow for more! 🌟`,
+          thumbnail: { url: interaction.user.displayAvatarURL() },
+          footer: { text: 'Tip: Use /pull to wish for characters!' }
+        }]
       });
     }
 
@@ -518,22 +498,22 @@ client.on('interactionCreate', async interaction => {
       const primos = player?.primogems || 0;
       const pulls = Math.floor(primos / PULL_COST);
       return interaction.reply({
-        embeds: [new EmbedBuilder()
-          .setColor(0x5865F2)
-          .setTitle(`💰 ${interaction.user.username}'s Balance`)
-          .setDescription(`**💎 Primogems:** ${primos}\n**✨ Pulls Available:** ${pulls}\n\nEarn more with **/daily** or **/buy**!`)
-          .setThumbnail(interaction.user.displayAvatarURL())
-        ]
+        embeds: [{
+          color: 0x5865F2,
+          title: `💰 ${interaction.user.username}'s Balance`,
+          description: `**💎 Primogems:** ${primos}\n**✨ Pulls Available:** ${pulls}\n\nEarn more with **/daily** or **/buy**!`,
+          thumbnail: { url: interaction.user.displayAvatarURL() },
+        }]
       });
     }
 
     // ===== SHOP =====
     if (name === 'shop') {
       return interaction.reply({
-        embeds: [new EmbedBuilder()
-          .setColor(0xFFD700)
-          .setTitle('🛒 Primogem Shop')
-          .setDescription([
+        embeds: [{
+          color: 0xFFD700,
+          title: '🛒 Primogem Shop',
+          description: [
             '> Buy Primogems to wish for characters!\n',
             '**🆓 Free** — 💎 60 Primogems → `/daily` *(every 24h)*',
             '**💳 Buy** — 💎 Up to 20,000 per day → `/buy <amount>`',
@@ -542,9 +522,9 @@ client.on('interactionCreate', async interaction => {
             '> 💡 **10 Pulls = 1600 Primogems**',
             '> 💡 **Soft Pity starts at pull 74**',
             '> 💡 **Hard Pity = pull 90 (guaranteed 5★)**',
-          ].join('\n'))
-          .setFooter({ text: 'Use /daily every day to earn free Primogems!' })
-        ]
+          ].join('\n'),
+          footer: { text: 'Use /daily every day to earn free Primogems!' }
+        }]
       });
     }
 
@@ -556,17 +536,17 @@ client.on('interactionCreate', async interaction => {
       const pullsLeft = 90 - pity;
       const softPityIn = pity >= 74 ? 0 : 74 - pity;
       return interaction.reply({
-        embeds: [new EmbedBuilder()
-          .setColor(0xA855F7)
-          .setTitle(`🎯 ${interaction.user.username}'s Pity`)
-          .addFields(
+        embeds: [{
+          color: 0xA855F7,
+          title: `🎯 ${interaction.user.username}'s Pity`,
+          fields: [
             { name: '🔢 Current Pity', value: `${pity} / 90`, inline: true },
             { name: '🎰 Hard Pity In', value: `${pullsLeft} pulls`, inline: true },
             { name: '📈 Soft Pity In', value: softPityIn === 0 ? '✅ Active now!' : `${softPityIn} pulls`, inline: true },
-            { name: '🎲 50/50 Status', value: guaranteed ? '✅ **GUARANTEED** next 5★!' : '⚠️ On 50/50 (50% chance)', inline: false }
-          )
-          .setFooter({ text: 'Soft pity starts at pull 74 — higher chance of 5★!' })
-        ]
+            { name: '🎲 50/50 Status', value: guaranteed ? '✅ **GUARANTEED** next 5★!' : '⚠️ On 50/50 (50% chance)', inline: false },
+          ],
+          footer: { text: 'Soft pity starts at pull 74 — higher chance of 5★!' }
+        }]
       });
     }
 
@@ -579,11 +559,7 @@ client.on('interactionCreate', async interaction => {
       );
       if (player.primogems < PULL_COST) {
         return interaction.reply({
-          embeds: [new EmbedBuilder()
-            .setColor(0xFF5555)
-            .setTitle('❌ Not Enough Primogems!')
-            .setDescription(`You need **160 💎** to pull!\n\nYou have: **${player.primogems} 💎**\n\nGet more with **/daily** or **/buy**!`)
-          ]
+          embeds: [{ color: 0xFF5555, title: '❌ Not Enough Primogems!', description: `You need **160 💎** to pull!\n\nYou have: **${player.primogems} 💎**\n\nGet more with **/daily** or **/buy**!` }]
         });
       }
       const { char, is5Star } = doWish(player);
@@ -597,15 +573,15 @@ client.on('interactionCreate', async interaction => {
       );
       const updatedPlayer = await Player.findOne({ userId: interaction.user.id });
       return interaction.reply({
-        embeds: [new EmbedBuilder()
-          .setColor(char.color)
-          .setAuthor({ name: '✨ Genshin Impact — Wish Result' })
-          .setTitle(`${char.name}`)
-          .setDescription(`**Element:** ${char.element}\n**Rarity:** ${'⭐'.repeat(char.stars)}\n\n${is5Star ? '🎉 **RARE 5★ PULL! You got lucky!**' : '💫 A fine addition to your roster!'}\n\n💎 **Remaining:** ${updatedPlayer.primogems} | 🎯 **Pity:** ${updatedPlayer.pity}/90`)
-          .setImage(char.image)
-          .setFooter({ text: is5Star ? '✦ 5★ Character Obtained!' : '✦ 4★ Character Obtained! | Added to /inventory' })
-          .setTimestamp()
-        ]
+        embeds: [{
+          color: char.color,
+          author: { name: '✨ Genshin Impact — Wish Result' },
+          title: `${char.name}`,
+          description: `**Element:** ${char.element}\n**Rarity:** ${'⭐'.repeat(char.stars)}\n\n${is5Star ? '🎉 **RARE 5★ PULL! You got lucky!**' : '💫 A fine addition to your roster!'}\n\n💎 **Remaining:** ${updatedPlayer.primogems} | 🎯 **Pity:** ${updatedPlayer.pity}/90`,
+          image: { url: char.image },
+          footer: { text: is5Star ? '✦ 5★ Character Obtained!' : '✦ 4★ Character Obtained! | Added to /inventory' },
+          timestamp: new Date().toISOString()
+        }]
       });
     }
 
@@ -619,11 +595,7 @@ client.on('interactionCreate', async interaction => {
       const cost = PULL_COST * 10;
       if (player.primogems < cost) {
         return interaction.reply({
-          embeds: [new EmbedBuilder()
-            .setColor(0xFF5555)
-            .setTitle('❌ Not Enough Primogems!')
-            .setDescription(`You need **1600 💎** for 10 pulls!\n\nYou have: **${player.primogems} 💎**\n\nGet more with **/daily** or **/buy**!`)
-          ]
+          embeds: [{ color: 0xFF5555, title: '❌ Not Enough Primogems!', description: `You need **1600 💎** for 10 pulls!\n\nYou have: **${player.primogems} 💎**\n\nGet more with **/daily** or **/buy**!` }]
         });
       }
 
@@ -653,26 +625,26 @@ client.on('interactionCreate', async interaction => {
         if (r.is5Star) {
           return `✦ **${r.char.name}** ⭐⭐⭐⭐⭐ — ${r.char.element} 🌟`;
         }
-        return `**${r.char.name}** ⭐⭐⭐⭐ — ${r.char.element}`;
+        return `${r.char.name} ⭐⭐⭐⭐ — ${r.char.element}`;
       }).join('\n');
 
       return interaction.reply({
-        embeds: [new EmbedBuilder()
-          .setColor(fiveStarResults.length > 0 ? 0xFFD700 : 0x5865F2)
-          .setAuthor({ name: `✨ Genshin Impact — 10 Wish Results`, iconURL: interaction.user.displayAvatarURL() })
-          .setTitle(fiveStarResults.length > 0
+        embeds: [{
+          color: fiveStarResults.length > 0 ? 0xFFD700 : 0x5865F2,
+          author: { name: `✨ Genshin Impact — 10 Wish Results`, icon_url: interaction.user.displayAvatarURL() },
+          title: fiveStarResults.length > 0
             ? `🎉 ${fiveStarResults.map(r => r.char.name).join(', ')} obtained!`
-            : '💫 10 Wishes Complete!')
-          .setDescription(pullList)
-          .setThumbnail(featuredChar.image)
-          .addFields(
+            : '💫 10 Wishes Complete!',
+          description: pullList,
+          thumbnail: { url: featuredChar.image },
+          fields: [
             { name: '💎 Primogems Left', value: `${updatedPlayer.primogems}`, inline: true },
             { name: '🎯 Current Pity', value: `${updatedPlayer.pity}/90`, inline: true },
-            { name: '🌟 5★ Obtained', value: fiveStarResults.length > 0 ? fiveStarResults.map(r => `${r.char.name}`).join(', ') : 'None this time...', inline: true }
-          )
-          .setFooter({ text: fiveStarResults.length > 0 ? `✦ Rare character(s) added to your inventory!` : 'No 5★ this time... Keep wishing! Use /pull10 again' })
-          .setTimestamp()
-        ]
+            { name: '🌟 5★ Obtained', value: fiveStarResults.length > 0 ? fiveStarResults.map(r => `${r.char.name}`).join(', ') : 'None this time...', inline: true },
+          ],
+          footer: { text: fiveStarResults.length > 0 ? `✦ Rare character(s) added to your inventory!` : 'No 5★ this time... Keep wishing! Use /pull10 again' },
+          timestamp: new Date().toISOString()
+        }]
       });
     }
 
@@ -684,14 +656,14 @@ client.on('interactionCreate', async interaction => {
 
       if (!data || data.characters.length === 0) {
         return interaction.editReply({
-          embeds: [new EmbedBuilder()
-            .setColor(0x5865F2)
-            .setTitle(`📦 ${target.username}'s Collection`)
-            .setDescription(target.id === interaction.user.id
+          embeds: [{
+            color: 0x5865F2,
+            title: `📦 ${target.username}'s Collection`,
+            description: target.id === interaction.user.id
               ? "You haven't pulled any characters yet!\nUse **/pull** to start your collection! ✨"
-              : `**${target.username}** hasn't pulled any characters yet!`)
-            .setThumbnail(target.displayAvatarURL({ size: 256 }))
-          ]
+              : `**${target.username}** hasn't pulled any characters yet!`,
+            thumbnail: { url: target.displayAvatarURL({ size: 256 }) }
+          }]
         });
       }
 
@@ -712,11 +684,11 @@ client.on('interactionCreate', async interaction => {
     // ===== GIFT =====
     if (name === 'gift') {
       if (!OWNERS.includes(interaction.user.id)) {
-        return interaction.reply({ embeds: [new EmbedBuilder().setColor(0xFF5555).setTitle('❌ Owner Only!').setDescription('Only the bot owner can use this command.')], ephemeral: true });
+        return interaction.reply({ embeds: [{ color: 0xFF5555, title: '❌ Owner Only!', description: 'Only the bot owner can use this command.' }], ephemeral: true });
       }
       const target = interaction.options.getUser('user');
       const amount = interaction.options.getInteger('amount');
-      if (amount <= 0) return interaction.reply({ embeds: [new EmbedBuilder().setColor(0xFF5555).setTitle('❌ Invalid Amount!')], ephemeral: true });
+      if (amount <= 0) return interaction.reply({ embeds: [{ color: 0xFF5555, title: '❌ Invalid Amount!' }], ephemeral: true });
       await Player.findOneAndUpdate(
         { userId: target.id },
         { $setOnInsert: { username: target.username, primogems: 0, pity: 0, guaranteed: false, lastDaily: null, characters: [] } },
@@ -728,12 +700,12 @@ client.on('interactionCreate', async interaction => {
         { new: true }
       );
       return interaction.reply({
-        embeds: [new EmbedBuilder()
-          .setColor(0x00FF00)
-          .setTitle('🎁 Primogems Gifted!')
-          .setDescription(`Successfully gifted **${amount} 💎** to **${target.username}**!\n\n**Their New Balance:** ${updated.primogems} 💎`)
-          .setThumbnail(target.displayAvatarURL())
-        ]
+        embeds: [{
+          color: 0x00FF00,
+          title: '🎁 Primogems Gifted!',
+          description: `Successfully gifted **${amount} 💎** to **${target.username}**!\n\n**Their New Balance:** ${updated.primogems} 💎`,
+          thumbnail: { url: target.displayAvatarURL() },
+        }]
       });
     }
 
@@ -745,7 +717,7 @@ client.on('interactionCreate', async interaction => {
         { upsert: true, new: true }
       );
       const amount = interaction.options.getInteger('amount');
-      if (amount <= 0) return interaction.reply({ embeds: [new EmbedBuilder().setColor(0xFF5555).setTitle('❌ Invalid Amount!')], ephemeral: true });
+      if (amount <= 0) return interaction.reply({ embeds: [{ color: 0xFF5555, title: '❌ Invalid Amount!' }], ephemeral: true });
 
       const now = new Date();
       const lastBuy = player.lastBuy ? new Date(player.lastBuy) : null;
@@ -756,11 +728,11 @@ client.on('interactionCreate', async interaction => {
       if (boughtToday + amount > BUY_LIMIT) {
         const remaining = BUY_LIMIT - boughtToday;
         return interaction.reply({
-          embeds: [new EmbedBuilder()
-            .setColor(0xFF5555)
-            .setTitle('❌ Daily Limit Exceeded!')
-            .setDescription(`Max **${BUY_LIMIT} 💎** per 24 hours.\n\n**Bought today:** ${boughtToday} 💎\n**Still available:** ${remaining} 💎\n**Resets:** <t:${Math.floor((lastBuy.getTime() + 24 * 60 * 60 * 1000) / 1000)}:R>`)
-          ],
+          embeds: [{
+            color: 0xFF5555,
+            title: '❌ Daily Limit Exceeded!',
+            description: `Max **${BUY_LIMIT} 💎** per 24 hours.\n\n**Bought today:** ${boughtToday} 💎\n**Still available:** ${remaining} 💎\n**Resets:** <t:${Math.floor((lastBuy.getTime() + 24 * 60 * 60 * 1000) / 1000)}:R>`,
+          }],
           ephemeral: true
         });
       }
@@ -772,13 +744,13 @@ client.on('interactionCreate', async interaction => {
       );
       const nextReset = new Date(now.getTime() + 24 * 60 * 60 * 1000);
       return interaction.reply({
-        embeds: [new EmbedBuilder()
-          .setColor(0x00FF00)
-          .setTitle('✅ Purchase Successful!')
-          .setDescription(`You got **${amount} 💎 Primogems!**\n\n**New Balance:** ${updated.primogems} 💎\n**Bought Today:** ${updated.boughtToday} / ${BUY_LIMIT} 💎\n**Next Reset:** <t:${Math.floor(nextReset.getTime() / 1000)}:R>`)
-          .setThumbnail(interaction.user.displayAvatarURL())
-          .setFooter({ text: 'Use /pull to wish for characters!' })
-        ]
+        embeds: [{
+          color: 0x00FF00,
+          title: '✅ Purchase Successful!',
+          description: `You got **${amount} 💎 Primogems!**\n\n**New Balance:** ${updated.primogems} 💎\n**Bought Today:** ${updated.boughtToday} / ${BUY_LIMIT} 💎\n**Next Reset:** <t:${Math.floor(nextReset.getTime() / 1000)}:R>`,
+          thumbnail: { url: interaction.user.displayAvatarURL() },
+          footer: { text: 'Use /pull to wish for characters!' }
+        }]
       });
     }
 
@@ -786,11 +758,7 @@ client.on('interactionCreate', async interaction => {
     if (name === 'avatar') {
       const target = interaction.options.getUser('user') || interaction.user;
       return interaction.reply({
-        embeds: [new EmbedBuilder()
-          .setColor(0x5865F2)
-          .setTitle(`🖼️ ${target.username}'s Avatar`)
-          .setImage(target.displayAvatarURL({ size: 512 }))
-        ]
+        embeds: [{ color: 0x5865F2, title: `🖼️ ${target.username}'s Avatar`, image: { url: target.displayAvatarURL({ size: 512 }) } }]
       });
     }
 
@@ -806,36 +774,36 @@ client.on('interactionCreate', async interaction => {
       const target = interaction.options.getUser('user') || interaction.user;
       const member = interaction.guild.members.cache.get(target.id);
       return interaction.reply({
-        embeds: [new EmbedBuilder()
-          .setColor(0x5865F2)
-          .setTitle(`👤 ${target.username}`)
-          .setThumbnail(target.displayAvatarURL())
-          .addFields(
+        embeds: [{
+          color: 0x5865F2,
+          title: `👤 ${target.username}`,
+          thumbnail: { url: target.displayAvatarURL() },
+          fields: [
             { name: '🆔 User ID', value: target.id, inline: true },
             { name: '🤖 Bot?', value: target.bot ? 'Yes' : 'No', inline: true },
             { name: '📅 Account Created', value: `<t:${Math.floor(target.createdTimestamp / 1000)}:D>`, inline: true },
-            { name: '📥 Joined Server', value: member ? `<t:${Math.floor(member.joinedTimestamp / 1000)}:D>` : 'Unknown', inline: true }
-          )
-        ]
+            { name: '📥 Joined Server', value: member ? `<t:${Math.floor(member.joinedTimestamp / 1000)}:D>` : 'Unknown', inline: true },
+          ]
+        }]
       });
     }
 
     if (name === 'serverinfo') {
       const g = interaction.guild;
       return interaction.reply({
-        embeds: [new EmbedBuilder()
-          .setColor(0x5865F2)
-          .setTitle(`📊 ${g.name}`)
-          .setThumbnail(g.iconURL())
-          .addFields(
+        embeds: [{
+          color: 0x5865F2,
+          title: `📊 ${g.name}`,
+          thumbnail: { url: g.iconURL() },
+          fields: [
             { name: '👑 Owner', value: `<@${g.ownerId}>`, inline: true },
             { name: '👥 Members', value: `${g.memberCount}`, inline: true },
             { name: '📺 Channels', value: `${g.channels.cache.size}`, inline: true },
             { name: '🎭 Roles', value: `${g.roles.cache.size}`, inline: true },
             { name: '🚀 Boosts', value: `${g.premiumSubscriptionCount ?? 0}`, inline: true },
             { name: '🆔 Server ID', value: g.id }
-          )
-        ]
+          ]
+        }]
       });
     }
 
@@ -843,13 +811,13 @@ client.on('interactionCreate', async interaction => {
       const target = interaction.options.getUser('user');
       const roast = roasts[Math.floor(Math.random() * roasts.length)];
       return interaction.reply({
-        embeds: [new EmbedBuilder()
-          .setColor(0xFF4500)
-          .setTitle(`🔥 Roasting ${target.username}...`)
-          .setDescription(roast)
-          .setThumbnail(target.displayAvatarURL({ size: 256 }))
-          .setFooter({ text: 'Just a joke, no harm intended 😄' })
-        ]
+        embeds: [{
+          color: 0xFF4500,
+          title: `🔥 Roasting ${target.username}...`,
+          description: roast,
+          thumbnail: { url: target.displayAvatarURL({ size: 256 }) },
+          footer: { text: 'Just a joke, no harm intended 😄' }
+        }]
       });
     }
 
@@ -864,12 +832,12 @@ client.on('interactionCreate', async interaction => {
       else if (percentage <= 80) { message = 'Great chemistry! 💕'; color = 0xFF69B4; }
       else { message = 'SOULMATES! Made for each other 💞'; color = 0xFF0000; }
       return interaction.reply({
-        embeds: [new EmbedBuilder()
-          .setColor(color)
-          .setTitle(`❤️ Love Meter`)
-          .setDescription(`**${user1.username}** ❤️ **${user2.username}**\n\n**${percentage}% compatibility!**\n\n${message}`)
-          .setThumbnail(user1.displayAvatarURL({ size: 256 }))
-        ]
+        embeds: [{
+          color,
+          title: `❤️ Love Meter`,
+          description: `**${user1.username}** ❤️ **${user2.username}**\n\n**${percentage}% compatibility!**\n\n${message}`,
+          thumbnail: { url: user1.displayAvatarURL({ size: 256 }) }
+        }]
       });
     }
 
