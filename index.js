@@ -9,6 +9,7 @@ const {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
+  EmbedBuilder
 } = require('discord.js');
 
 const axios = require('axios');
@@ -58,132 +59,132 @@ const Player = mongoose.model('Player', playerSchema);
 // ===== ALL GENSHIN CHARACTERS =====
 const genshinCharacters = [
   // MONDSTADT 5★
-  { name: 'Albedo', stars: 5, element: 'Geo', icon: '🪨', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Albedo.png' },
-  { name: 'Aloy', stars: 5, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Aloy.png' },
-  { name: 'Diluc', stars: 5, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Diluc.png' },
-  { name: 'Eula', stars: 5, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Eula.png' },
-  { name: 'Jean', stars: 5, element: 'Anemo', icon: '🌀', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Jean.png' },
-  { name: 'Klee', stars: 5, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Klee.png' },
-  { name: 'Mona', stars: 5, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Mona.png' },
-  { name: 'Varka', stars: 5, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Diluc.png' },
-  { name: 'Venti', stars: 5, element: 'Anemo', icon: '🌀', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Venti.png' },
-  { name: 'Durin', stars: 5, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Diluc.png' },
+  { name: 'Albedo', stars: 5, element: 'Geo', icon: 'https://enka.network/ui/UI_AvatarIcon_Albedo.png', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Albedo.png' },
+  { name: 'Aloy', stars: 5, element: 'Cryo', icon: 'https://enka.network/ui/UI_AvatarIcon_Aloy.png', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Aloy.png' },
+  { name: 'Diluc', stars: 5, element: 'Pyro', icon: 'https://enka.network/ui/UI_AvatarIcon_Diluc.png', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Diluc.png' },
+  { name: 'Eula', stars: 5, element: 'Cryo', icon: 'https://enka.network/ui/UI_AvatarIcon_Eula.png', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Eula.png' },
+  { name: 'Jean', stars: 5, element: 'Anemo', icon: 'https://enka.network/ui/UI_AvatarIcon_Jean.png', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Jean.png' },
+  { name: 'Klee', stars: 5, element: 'Pyro', icon: 'https://enka.network/ui/UI_AvatarIcon_Klee.png', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Klee.png' },
+  { name: 'Mona', stars: 5, element: 'Hydro', icon: 'https://enka.network/ui/UI_AvatarIcon_Mona.png', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Mona.png' },
+  { name: 'Varka', stars: 5, element: 'Pyro', icon: 'https://enka.network/ui/UI_AvatarIcon_Diluc.png', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Diluc.png' },
+  { name: 'Venti', stars: 5, element: 'Anemo', icon: 'https://enka.network/ui/UI_AvatarIcon_Venti.png', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Venti.png' },
+  { name: 'Durin', stars: 5, element: 'Pyro', icon: 'https://enka.network/ui/UI_AvatarIcon_Diluc.png', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Diluc.png' },
   // MONDSTADT 4★
-  { name: 'Amber', stars: 4, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Ambor.png' },
-  { name: 'Barbara', stars: 4, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Barbara.png' },
-  { name: 'Bennett', stars: 4, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Bennett.png' },
-  { name: 'Dahlia', stars: 4, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Barbara.png' },
-  { name: 'Diona', stars: 4, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Diona.png' },
-  { name: 'Fischl', stars: 4, element: 'Electro', icon: '⚡', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Fischl.png' },
-  { name: 'Kaeya', stars: 4, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Kaeya.png' },
-  { name: 'Lisa', stars: 4, element: 'Electro', icon: '⚡', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Lisa.png' },
-  { name: 'Mika', stars: 4, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Mika.png' },
-  { name: 'Noelle', stars: 4, element: 'Geo', icon: '🪨', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Noel.png' },
-  { name: 'Razor', stars: 4, element: 'Electro', icon: '⚡', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Razor.png' },
-  { name: 'Rosaria', stars: 4, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Rosaria.png' },
-  { name: 'Sucrose', stars: 4, element: 'Anemo', icon: '🌀', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Sucrose.png' },
+  { name: 'Amber', stars: 4, element: 'Pyro', icon: 'https://enka.network/ui/UI_AvatarIcon_Ambor.png', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Ambor.png' },
+  { name: 'Barbara', stars: 4, element: 'Hydro', icon: 'https://enka.network/ui/UI_AvatarIcon_Barbara.png', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Barbara.png' },
+  { name: 'Bennett', stars: 4, element: 'Pyro', icon: 'https://enka.network/ui/UI_AvatarIcon_Bennett.png', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Bennett.png' },
+  { name: 'Dahlia', stars: 4, element: 'Hydro', icon: 'https://enka.network/ui/UI_AvatarIcon_Barbara.png', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Barbara.png' },
+  { name: 'Diona', stars: 4, element: 'Cryo', icon: 'https://enka.network/ui/UI_AvatarIcon_Diona.png', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Diona.png' },
+  { name: 'Fischl', stars: 4, element: 'Electro', icon: 'https://enka.network/ui/UI_AvatarIcon_Fischl.png', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Fischl.png' },
+  { name: 'Kaeya', stars: 4, element: 'Cryo', icon: 'https://enka.network/ui/UI_AvatarIcon_Kaeya.png', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Kaeya.png' },
+  { name: 'Lisa', stars: 4, element: 'Electro', icon: 'https://enka.network/ui/UI_AvatarIcon_Lisa.png', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Lisa.png' },
+  { name: 'Mika', stars: 4, element: 'Cryo', icon: 'https://enka.network/ui/UI_AvatarIcon_Mika.png', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Mika.png' },
+  { name: 'Noelle', stars: 4, element: 'Geo', icon: 'https://enka.network/ui/UI_AvatarIcon_Noel.png', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Noel.png' },
+  { name: 'Razor', stars: 4, element: 'Electro', icon: 'https://enka.network/ui/UI_AvatarIcon_Razor.png', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Razor.png' },
+  { name: 'Rosaria', stars: 4, element: 'Cryo', icon: 'https://enka.network/ui/UI_AvatarIcon_Rosaria.png', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Rosaria.png' },
+  { name: 'Sucrose', stars: 4, element: 'Anemo', icon: 'https://enka.network/ui/UI_AvatarIcon_Sucrose.png', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Sucrose.png' },
   // LIYUE 5★
-  { name: 'Baizhu', stars: 5, element: 'Dendro', icon: '🌿', color: 0x86EFAC, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Baizhuer.png' },
-  { name: 'Ganyu', stars: 5, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Ganyu.png' },
-  { name: 'Hu Tao', stars: 5, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Hutao.png' },
-  { name: 'Keqing', stars: 5, element: 'Electro', icon: '⚡', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Keqing.png' },
-  { name: 'Qiqi', stars: 5, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Qiqi.png' },
-  { name: 'Shenhe', stars: 5, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Shenhe.png' },
-  { name: 'Xianyun', stars: 5, element: 'Anemo', icon: '🌀', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Liuyun.png' },
-  { name: 'Xiao', stars: 5, element: 'Anemo', icon: '🌀', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Xiao.png' },
-  { name: 'Yelan', stars: 5, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Yelan.png' },
-  { name: 'Zhongli', stars: 5, element: 'Geo', icon: '🪨', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Zhongli.png' },
-  { name: 'Zibai', stars: 5, element: 'Geo', icon: '🪨', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Zhongli.png' },
+  { name: 'Baizhu', stars: 5, element: 'Dendro', icon: 'https://enka.network/ui/UI_AvatarIcon_Baizhuer.png', color: 0x86EFAC, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Baizhuer.png' },
+  { name: 'Ganyu', stars: 5, element: 'Cryo', icon: 'https://enka.network/ui/UI_AvatarIcon_Ganyu.png', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Ganyu.png' },
+  { name: 'Hu Tao', stars: 5, element: 'Pyro', icon: 'https://enka.network/ui/UI_AvatarIcon_Hutao.png', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Hutao.png' },
+  { name: 'Keqing', stars: 5, element: 'Electro', icon: 'https://enka.network/ui/UI_AvatarIcon_Keqing.png', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Keqing.png' },
+  { name: 'Qiqi', stars: 5, element: 'Cryo', icon: 'https://enka.network/ui/UI_AvatarIcon_Qiqi.png', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Qiqi.png' },
+  { name: 'Shenhe', stars: 5, element: 'Cryo', icon: 'https://enka.network/ui/UI_AvatarIcon_Shenhe.png', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Shenhe.png' },
+  { name: 'Xianyun', stars: 5, element: 'Anemo', icon: 'https://enka.network/ui/UI_AvatarIcon_Liuyun.png', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Liuyun.png' },
+  { name: 'Xiao', stars: 5, element: 'Anemo', icon: 'https://enka.network/ui/UI_AvatarIcon_Xiao.png', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Xiao.png' },
+  { name: 'Yelan', stars: 5, element: 'Hydro', icon: 'https://enka.network/ui/UI_AvatarIcon_Yelan.png', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Yelan.png' },
+  { name: 'Zhongli', stars: 5, element: 'Geo', icon: 'https://enka.network/ui/UI_AvatarIcon_Zhongli.png', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Zhongli.png' },
+  { name: 'Zibai', stars: 5, element: 'Geo', icon: 'https://enka.network/ui/UI_AvatarIcon_Zhongli.png', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Zhongli.png' },
   // LIYUE 4★
-  { name: 'Beidou', stars: 4, element: 'Electro', icon: '⚡', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Beidou.png' },
-  { name: 'Chongyun', stars: 4, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Chongyun.png' },
-  { name: 'Gaming', stars: 4, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Gaming.png' },
-  { name: 'Lan Yan', stars: 4, element: 'Anemo', icon: '🌀', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Lanyan.png' },
-  { name: 'Ningguang', stars: 4, element: 'Geo', icon: '🪨', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Ningguang.png' },
-  { name: 'Xiangling', stars: 4, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Xiangling.png' },
-  { name: 'Xingqiu', stars: 4, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Xingqiu.png' },
-  { name: 'Xinyan', stars: 4, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Xinyan.png' },
-  { name: 'Yanfei', stars: 4, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Feiyan.png' },
-  { name: 'Yaoyao', stars: 4, element: 'Dendro', icon: '🌿', color: 0x86EFAC, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Yaoyao.png' },
-  { name: 'Yun Jin', stars: 4, element: 'Geo', icon: '🪨', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Yunjin.png' },
+  { name: 'Beidou', stars: 4, element: 'Electro', icon: 'https://enka.network/ui/UI_AvatarIcon_Beidou.png', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Beidou.png' },
+  { name: 'Chongyun', stars: 4, element: 'Cryo', icon: 'https://enka.network/ui/UI_AvatarIcon_Chongyun.png', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Chongyun.png' },
+  { name: 'Gaming', stars: 4, element: 'Pyro', icon: 'https://enka.network/ui/UI_AvatarIcon_Gaming.png', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Gaming.png' },
+  { name: 'Lan Yan', stars: 4, element: 'Anemo', icon: 'https://enka.network/ui/UI_AvatarIcon_Lanyan.png', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Lanyan.png' },
+  { name: 'Ningguang', stars: 4, element: 'Geo', icon: 'https://enka.network/ui/UI_AvatarIcon_Ningguang.png', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Ningguang.png' },
+  { name: 'Xiangling', stars: 4, element: 'Pyro', icon: 'https://enka.network/ui/UI_AvatarIcon_Xiangling.png', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Xiangling.png' },
+  { name: 'Xingqiu', stars: 4, element: 'Hydro', icon: 'https://enka.network/ui/UI_AvatarIcon_Xingqiu.png', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Xingqiu.png' },
+  { name: 'Xinyan', stars: 4, element: 'Pyro', icon: 'https://enka.network/ui/UI_AvatarIcon_Xinyan.png', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Xinyan.png' },
+  { name: 'Yanfei', stars: 4, element: 'Pyro', icon: 'https://enka.network/ui/UI_AvatarIcon_Feiyan.png', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Feiyan.png' },
+  { name: 'Yaoyao', stars: 4, element: 'Dendro', icon: 'https://enka.network/ui/UI_AvatarIcon_Yaoyao.png', color: 0x86EFAC, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Yaoyao.png' },
+  { name: 'Yun Jin', stars: 4, element: 'Geo', icon: 'https://enka.network/ui/UI_AvatarIcon_Yunjin.png', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Yunjin.png' },
   // INAZUMA 5★
-  { name: 'Arataki Itto', stars: 5, element: 'Geo', icon: '🪨', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Itto.png' },
-  { name: 'Chiori', stars: 5, element: 'Geo', icon: '🪨', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Chiori.png' },
-  { name: 'Kaedehara Kazuha', stars: 5, element: 'Anemo', icon: '🌀', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Kazuha.png' },
-  { name: 'Kamisato Ayaka', stars: 5, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Ayaka.png' },
-  { name: 'Kamisato Ayato', stars: 5, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Ayato.png' },
-  { name: 'Raiden Shogun', stars: 5, element: 'Electro', icon: '⚡', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Shougun.png' },
-  { name: 'Sangonomiya Kokomi', stars: 5, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Kokomi.png' },
-  { name: 'Yae Miko', stars: 5, element: 'Electro', icon: '⚡', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Yae.png' },
-  { name: 'Yoimiya', stars: 5, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Yoimiya.png' },
-  { name: 'Yumemizuki Mizuki', stars: 5, element: 'Anemo', icon: '🌀', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Mizuki.png' },
+  { name: 'Arataki Itto', stars: 5, element: 'Geo', icon: 'https://enka.network/ui/UI_AvatarIcon_Itto.png', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Itto.png' },
+  { name: 'Chiori', stars: 5, element: 'Geo', icon: 'https://enka.network/ui/UI_AvatarIcon_Chiori.png', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Chiori.png' },
+  { name: 'Kaedehara Kazuha', stars: 5, element: 'Anemo', icon: 'https://enka.network/ui/UI_AvatarIcon_Kazuha.png', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Kazuha.png' },
+  { name: 'Kamisato Ayaka', stars: 5, element: 'Cryo', icon: 'https://enka.network/ui/UI_AvatarIcon_Ayaka.png', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Ayaka.png' },
+  { name: 'Kamisato Ayato', stars: 5, element: 'Hydro', icon: 'https://enka.network/ui/UI_AvatarIcon_Ayato.png', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Ayato.png' },
+  { name: 'Raiden Shogun', stars: 5, element: 'Electro', icon: 'https://enka.network/ui/UI_AvatarIcon_Shougun.png', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Shougun.png' },
+  { name: 'Sangonomiya Kokomi', stars: 5, element: 'Hydro', icon: 'https://enka.network/ui/UI_AvatarIcon_Kokomi.png', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Kokomi.png' },
+  { name: 'Yae Miko', stars: 5, element: 'Electro', icon: 'https://enka.network/ui/UI_AvatarIcon_Yae.png', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Yae.png' },
+  { name: 'Yoimiya', stars: 5, element: 'Pyro', icon: 'https://enka.network/ui/UI_AvatarIcon_Yoimiya.png', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Yoimiya.png' },
+  { name: 'Yumemizuki Mizuki', stars: 5, element: 'Anemo', icon: 'https://enka.network/ui/UI_AvatarIcon_Mizuki.png', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Mizuki.png' },
   // INAZUMA 4★
-  { name: 'Gorou', stars: 4, element: 'Geo', icon: '🪨', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Gorou.png' },
-  { name: 'Kujou Sara', stars: 4, element: 'Electro', icon: '⚡', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Sara.png' },
-  { name: 'Kuki Shinobu', stars: 4, element: 'Electro', icon: '⚡', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Shinobu.png' },
-  { name: 'Kirara', stars: 4, element: 'Dendro', icon: '🌿', color: 0x86EFAC, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Kirara.png' },
-  { name: 'Sayu', stars: 4, element: 'Anemo', icon: '🌀', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Sayu.png' },
-  { name: 'Shikanoin Heizou', stars: 4, element: 'Anemo', icon: '🌀', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Heizo.png' },
-  { name: 'Thoma', stars: 4, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Tohma.png' },
+  { name: 'Gorou', stars: 4, element: 'Geo', icon: 'https://enka.network/ui/UI_AvatarIcon_Gorou.png', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Gorou.png' },
+  { name: 'Kujou Sara', stars: 4, element: 'Electro', icon: 'https://enka.network/ui/UI_AvatarIcon_Sara.png', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Sara.png' },
+  { name: 'Kuki Shinobu', stars: 4, element: 'Electro', icon: 'https://enka.network/ui/UI_AvatarIcon_Shinobu.png', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Shinobu.png' },
+  { name: 'Kirara', stars: 4, element: 'Dendro', icon: 'https://enka.network/ui/UI_AvatarIcon_Kirara.png', color: 0x86EFAC, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Kirara.png' },
+  { name: 'Sayu', stars: 4, element: 'Anemo', icon: 'https://enka.network/ui/UI_AvatarIcon_Sayu.png', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Sayu.png' },
+  { name: 'Shikanoin Heizou', stars: 4, element: 'Anemo', icon: 'https://enka.network/ui/UI_AvatarIcon_Heizo.png', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Heizo.png' },
+  { name: 'Thoma', stars: 4, element: 'Pyro', icon: 'https://enka.network/ui/UI_AvatarIcon_Tohma.png', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Tohma.png' },
   // SUMERU 5★
-  { name: 'Alhaitham', stars: 5, element: 'Dendro', icon: '🌿', color: 0x86EFAC, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Alhatham.png' },
-  { name: 'Cyno', stars: 5, element: 'Electro', icon: '⚡', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Cyno.png' },
-  { name: 'Dehya', stars: 5, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Dehya.png' },
-  { name: 'Nahida', stars: 5, element: 'Dendro', icon: '🌿', color: 0x86EFAC, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Nahida.png' },
-  { name: 'Nilou', stars: 5, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Nilou.png' },
-  { name: 'Tighnari', stars: 5, element: 'Dendro', icon: '🌿', color: 0x86EFAC, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Tighnari.png' },
-  { name: 'Wanderer', stars: 5, element: 'Anemo', icon: '🌀', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Wanderer.png' },
+  { name: 'Alhaitham', stars: 5, element: 'Dendro', icon: 'https://enka.network/ui/UI_AvatarIcon_Alhatham.png', color: 0x86EFAC, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Alhatham.png' },
+  { name: 'Cyno', stars: 5, element: 'Electro', icon: 'https://enka.network/ui/UI_AvatarIcon_Cyno.png', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Cyno.png' },
+  { name: 'Dehya', stars: 5, element: 'Pyro', icon: 'https://enka.network/ui/UI_AvatarIcon_Dehya.png', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Dehya.png' },
+  { name: 'Nahida', stars: 5, element: 'Dendro', icon: 'https://enka.network/ui/UI_AvatarIcon_Nahida.png', color: 0x86EFAC, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Nahida.png' },
+  { name: 'Nilou', stars: 5, element: 'Hydro', icon: 'https://enka.network/ui/UI_AvatarIcon_Nilou.png', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Nilou.png' },
+  { name: 'Tighnari', stars: 5, element: 'Dendro', icon: 'https://enka.network/ui/UI_AvatarIcon_Tighnari.png', color: 0x86EFAC, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Tighnari.png' },
+  { name: 'Wanderer', stars: 5, element: 'Anemo', icon: 'https://enka.network/ui/UI_AvatarIcon_Wanderer.png', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Wanderer.png' },
   // SUMERU 4★
-  { name: 'Candace', stars: 4, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Candace.png' },
-  { name: 'Collei', stars: 4, element: 'Dendro', icon: '🌿', color: 0x86EFAC, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Collei.png' },
-  { name: 'Dori', stars: 4, element: 'Electro', icon: '⚡', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Dori.png' },
-  { name: 'Faruzan', stars: 4, element: 'Anemo', icon: '🌀', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Faruzan.png' },
-  { name: 'Kaveh', stars: 4, element: 'Dendro', icon: '🌿', color: 0x86EFAC, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Kaveh.png' },
-  { name: 'Layla', stars: 4, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Layla.png' },
-  { name: 'Sethos', stars: 4, element: 'Electro', icon: '⚡', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Sethos.png' },
+  { name: 'Candace', stars: 4, element: 'Hydro', icon: 'https://enka.network/ui/UI_AvatarIcon_Candace.png', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Candace.png' },
+  { name: 'Collei', stars: 4, element: 'Dendro', icon: 'https://enka.network/ui/UI_AvatarIcon_Collei.png', color: 0x86EFAC, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Collei.png' },
+  { name: 'Dori', stars: 4, element: 'Electro', icon: 'https://enka.network/ui/UI_AvatarIcon_Dori.png', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Dori.png' },
+  { name: 'Faruzan', stars: 4, element: 'Anemo', icon: 'https://enka.network/ui/UI_AvatarIcon_Faruzan.png', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Faruzan.png' },
+  { name: 'Kaveh', stars: 4, element: 'Dendro', icon: 'https://enka.network/ui/UI_AvatarIcon_Kaveh.png', color: 0x86EFAC, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Kaveh.png' },
+  { name: 'Layla', stars: 4, element: 'Cryo', icon: 'https://enka.network/ui/UI_AvatarIcon_Layla.png', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Layla.png' },
+  { name: 'Sethos', stars: 4, element: 'Electro', icon: 'https://enka.network/ui/UI_AvatarIcon_Sethos.png', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Sethos.png' },
   // FONTAINE 5★
-  { name: 'Arlecchino', stars: 5, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Arlecchino.png' },
-  { name: 'Clorinde', stars: 5, element: 'Electro', icon: '⚡', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Clorinde.png' },
-  { name: 'Emilie', stars: 5, element: 'Dendro', icon: '🌿', color: 0x86EFAC, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Emilie.png' },
-  { name: 'Escoffier', stars: 5, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Escoffier.png' },
-  { name: 'Furina', stars: 5, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Furina.png' },
-  { name: 'Lyney', stars: 5, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Lyney.png' },
-  { name: 'Navia', stars: 5, element: 'Geo', icon: '🪨', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Navia.png' },
-  { name: 'Neuvillette', stars: 5, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Neuvillette.png' },
-  { name: 'Sigewinne', stars: 5, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Sigewinne.png' },
-  { name: 'Wriothesley', stars: 5, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Wriothesley.png' },
+  { name: 'Arlecchino', stars: 5, element: 'Pyro', icon: 'https://enka.network/ui/UI_AvatarIcon_Arlecchino.png', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Arlecchino.png' },
+  { name: 'Clorinde', stars: 5, element: 'Electro', icon: 'https://enka.network/ui/UI_AvatarIcon_Clorinde.png', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Clorinde.png' },
+  { name: 'Emilie', stars: 5, element: 'Dendro', icon: 'https://enka.network/ui/UI_AvatarIcon_Emilie.png', color: 0x86EFAC, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Emilie.png' },
+  { name: 'Escoffier', stars: 5, element: 'Cryo', icon: 'https://enka.network/ui/UI_AvatarIcon_Escoffier.png', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Escoffier.png' },
+  { name: 'Furina', stars: 5, element: 'Hydro', icon: 'https://enka.network/ui/UI_AvatarIcon_Furina.png', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Furina.png' },
+  { name: 'Lyney', stars: 5, element: 'Pyro', icon: 'https://enka.network/ui/UI_AvatarIcon_Lyney.png', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Lyney.png' },
+  { name: 'Navia', stars: 5, element: 'Geo', icon: 'https://enka.network/ui/UI_AvatarIcon_Navia.png', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Navia.png' },
+  { name: 'Neuvillette', stars: 5, element: 'Hydro', icon: 'https://enka.network/ui/UI_AvatarIcon_Neuvillette.png', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Neuvillette.png' },
+  { name: 'Sigewinne', stars: 5, element: 'Hydro', icon: 'https://enka.network/ui/UI_AvatarIcon_Sigewinne.png', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Sigewinne.png' },
+  { name: 'Wriothesley', stars: 5, element: 'Cryo', icon: 'https://enka.network/ui/UI_AvatarIcon_Wriothesley.png', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Wriothesley.png' },
   // FONTAINE 4★
-  { name: 'Charlotte', stars: 4, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Charlotte.png' },
-  { name: 'Chevreuse', stars: 4, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Chevreuse.png' },
-  { name: 'Freminet', stars: 4, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Freminet.png' },
-  { name: 'Lynette', stars: 4, element: 'Anemo', icon: '🌀', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Linette.png' },
+  { name: 'Charlotte', stars: 4, element: 'Cryo', icon: 'https://enka.network/ui/UI_AvatarIcon_Charlotte.png', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Charlotte.png' },
+  { name: 'Chevreuse', stars: 4, element: 'Pyro', icon: 'https://enka.network/ui/UI_AvatarIcon_Chevreuse.png', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Chevreuse.png' },
+  { name: 'Freminet', stars: 4, element: 'Cryo', icon: 'https://enka.network/ui/UI_AvatarIcon_Freminet.png', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Freminet.png' },
+  { name: 'Lynette', stars: 4, element: 'Anemo', icon: 'https://enka.network/ui/UI_AvatarIcon_Linette.png', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Linette.png' },
   // NATLAN 5★
-  { name: 'Chasca', stars: 5, element: 'Anemo', icon: '🌀', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Chasca.png' },
-  { name: 'Citlali', stars: 5, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Citlali.png' },
-  { name: 'Kinich', stars: 5, element: 'Dendro', icon: '🌿', color: 0x86EFAC, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Kinich.png' },
-  { name: 'Mavuika', stars: 5, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Mavuika.png' },
-  { name: 'Mualani', stars: 5, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Mualani.png' },
-  { name: 'Nefer', stars: 5, element: 'Pyro', icon: '🔥', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Mavuika.png' },
-  { name: 'Xilonen', stars: 5, element: 'Geo', icon: '🪨', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Xilonen.png' },
-  { name: 'Varesa', stars: 5, element: 'Electro', icon: '⚡', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Varesa.png' },
+  { name: 'Chasca', stars: 5, element: 'Anemo', icon: 'https://enka.network/ui/UI_AvatarIcon_Chasca.png', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Chasca.png' },
+  { name: 'Citlali', stars: 5, element: 'Cryo', icon: 'https://enka.network/ui/UI_AvatarIcon_Citlali.png', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Citlali.png' },
+  { name: 'Kinich', stars: 5, element: 'Dendro', icon: 'https://enka.network/ui/UI_AvatarIcon_Kinich.png', color: 0x86EFAC, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Kinich.png' },
+  { name: 'Mavuika', stars: 5, element: 'Pyro', icon: 'https://enka.network/ui/UI_AvatarIcon_Mavuika.png', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Mavuika.png' },
+  { name: 'Mualani', stars: 5, element: 'Hydro', icon: 'https://enka.network/ui/UI_AvatarIcon_Mualani.png', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Mualani.png' },
+  { name: 'Nefer', stars: 5, element: 'Pyro', icon: 'https://enka.network/ui/UI_AvatarIcon_Mavuika.png', color: 0xFF6B35, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Mavuika.png' },
+  { name: 'Xilonen', stars: 5, element: 'Geo', icon: 'https://enka.network/ui/UI_AvatarIcon_Xilonen.png', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Xilonen.png' },
+  { name: 'Varesa', stars: 5, element: 'Electro', icon: 'https://enka.network/ui/UI_AvatarIcon_Varesa.png', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Varesa.png' },
   // NATLAN 4★
-  { name: 'Iansan', stars: 4, element: 'Electro', icon: '⚡', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Iansan.png' },
-  { name: 'Ifa', stars: 4, element: 'Anemo', icon: '🌀', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Sayu.png' },
-  { name: 'Kachina', stars: 4, element: 'Geo', icon: '🪨', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Kachina.png' },
-  { name: 'Ororon', stars: 4, element: 'Electro', icon: '⚡', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Ororon.png' },
+  { name: 'Iansan', stars: 4, element: 'Electro', icon: 'https://enka.network/ui/UI_AvatarIcon_Iansan.png', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Iansan.png' },
+  { name: 'Ifa', stars: 4, element: 'Anemo', icon: 'https://enka.network/ui/UI_AvatarIcon_Sayu.png', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Sayu.png' },
+  { name: 'Kachina', stars: 4, element: 'Geo', icon: 'https://enka.network/ui/UI_AvatarIcon_Kachina.png', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Kachina.png' },
+  { name: 'Ororon', stars: 4, element: 'Electro', icon: 'https://enka.network/ui/UI_AvatarIcon_Ororon.png', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Ororon.png' },
   // NOD-KRAI 5★
-  { name: 'Columbina', stars: 5, element: 'Hydro', icon: '💧', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Kokomi.png' },
-  { name: 'Flins', stars: 5, element: 'Electro', icon: '⚡', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Yae.png' },
-  { name: 'Ineffa', stars: 5, element: 'Electro', icon: '⚡', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Clorinde.png' },
-  { name: 'Lauma', stars: 5, element: 'Dendro', icon: '🌿', color: 0x86EFAC, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Nahida.png' },
-  { name: 'Linnea', stars: 5, element: 'Geo', icon: '🪨', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Navia.png' },
+  { name: 'Columbina', stars: 5, element: 'Hydro', icon: 'https://enka.network/ui/UI_AvatarIcon_Kokomi.png', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Kokomi.png' },
+  { name: 'Flins', stars: 5, element: 'Electro', icon: 'https://enka.network/ui/UI_AvatarIcon_Yae.png', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Yae.png' },
+  { name: 'Ineffa', stars: 5, element: 'Electro', icon: 'https://enka.network/ui/UI_AvatarIcon_Clorinde.png', color: 0xA855F7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Clorinde.png' },
+  { name: 'Lauma', stars: 5, element: 'Dendro', icon: 'https://enka.network/ui/UI_AvatarIcon_Nahida.png', color: 0x86EFAC, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Nahida.png' },
+  { name: 'Linnea', stars: 5, element: 'Geo', icon: 'https://enka.network/ui/UI_AvatarIcon_Navia.png', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Navia.png' },
   // NOD-KRAI 4★
-  { name: 'Aino', stars: 4, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Barbara.png' },
-  { name: 'Illuga', stars: 4, element: 'Geo', icon: '🪨', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Noel.png' },
-  { name: 'Jahoda', stars: 4, element: 'Anemo', icon: '🌀', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Sucrose.png' },
+  { name: 'Aino', stars: 4, element: 'Hydro', icon: 'https://enka.network/ui/UI_AvatarIcon_Barbara.png', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Barbara.png' },
+  { name: 'Illuga', stars: 4, element: 'Geo', icon: 'https://enka.network/ui/UI_AvatarIcon_Noel.png', color: 0xF5A623, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Noel.png' },
+  { name: 'Jahoda', stars: 4, element: 'Anemo', icon: 'https://enka.network/ui/UI_AvatarIcon_Sucrose.png', color: 0x6EE7B7, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Sucrose.png' },
   // INDEPENDENT
-  { name: 'Skirk', stars: 5, element: 'Cryo', icon: '❄️', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Eula.png' },
-  { name: 'Tartaglia', stars: 5, element: 'Hydro', icon: '💧', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Tartaglia.png' },
+  { name: 'Skirk', stars: 5, element: 'Cryo', icon: 'https://enka.network/ui/UI_AvatarIcon_Eula.png', color: 0xBAE6FD, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Eula.png' },
+  { name: 'Tartaglia', stars: 5, element: 'Hydro', icon: 'https://enka.network/ui/UI_AvatarIcon_Tartaglia.png', color: 0x4CC9F0, image: 'https://enka.network/ui/UI_Gacha_AvatarImg_Tartaglia.png' },
 ];
 
 const seenNames = new Set();
@@ -254,27 +255,40 @@ function buildCharListEmbed(page) {
     return first === last ? `(${first})` : `(${first}–${last})`;
   };
 
-const formatCol = (arr) => {
-  if (arr.length === 0) return '\u200b';
-
-  return arr.map(c => {
-    return `${c.icon} ${c.name}`;
-  }).join('\n');
-};
+  const formatCol = (arr) => {
+    if (arr.length === 0) return '\u200b';
+    return arr.map(c => {
+      return `[${c.name}](${c.icon})`;
+    }).join('\n');
+  };
 
   const endIndex = Math.min(start + CHARS_PER_PAGE, sortedChars.length);
 
-  return {
-    color: 0x5865F2,
-    title: `🗺️ Genshin Impact Characters (${start + 1}–${endIndex}/${sortedChars.length})`,
-    fields: [
-      { name: `⌁ ${getRange(col1)}`, value: formatCol(col1), inline: true },
-      { name: `꩜ ${getRange(col2)}`, value: formatCol(col2) || '\u200b', inline: true },
-      { name: `꩜ ${getRange(col3)}`, value: formatCol(col3) || '\u200b', inline: true },
-    ],
-    footer: { text: `Use /pull to wish for these characters! • Page ${page}/${totalPages}` },
-    timestamp: new Date().toISOString()
-  };
+  const embed = new EmbedBuilder()
+    .setColor(0x5865F2)
+    .setTitle(`📋 Genshin Impact Character Guides (${start + 1}–${endIndex}/${sortedChars.length})`)
+    .setThumbnail('https://enka.network/ui/UI_AvatarIcon_Albedo.png')
+    .addFields(
+      { name: `👥 ${getRange(col1)}`, value: formatCol(col1), inline: true },
+      { name: `👥 ${getRange(col2)}`, value: formatCol(col2) || '\u200b', inline: true },
+      { name: `👥 ${getRange(col3)}`, value: formatCol(col3) || '\u200b', inline: true }
+    )
+    .setFooter({ text: `Use /guide <character> for full guide! • Page ${page}/${totalPages}` })
+    .setTimestamp();
+
+  return embed;
+}
+
+// ===== BUILD PAGE BUTTONS (with first/last) =====
+function buildCharListButtons(page) {
+  const totalPages = Math.ceil(sortedChars.length / CHARS_PER_PAGE);
+  return new ActionRowBuilder().addComponents(
+    new ButtonBuilder().setCustomId(`cl_first_1`).setLabel('|◀◀').setStyle(ButtonStyle.Primary).setDisabled(page <= 1),
+    new ButtonBuilder().setCustomId(`cl_prev_${page - 1}`).setLabel('◀').setStyle(ButtonStyle.Primary).setDisabled(page <= 1),
+    new ButtonBuilder().setCustomId(`cl_cur_${page}`).setLabel(`${page}/${totalPages}`).setStyle(ButtonStyle.Secondary).setDisabled(true),
+    new ButtonBuilder().setCustomId(`cl_next_${page + 1}`).setLabel('▶').setStyle(ButtonStyle.Primary).setDisabled(page >= totalPages),
+    new ButtonBuilder().setCustomId(`cl_last_${totalPages}`).setLabel('▶▶|').setStyle(ButtonStyle.Primary).setDisabled(page >= totalPages),
+  );
 }
 
 // ===== BUILD INVENTORY EMBED =====
@@ -304,37 +318,26 @@ function buildInventoryEmbed(target, data, page, totalPages) {
     ? shown.map(c => {
         const dupText = c.count > 1 ? ` ×${c.count}` : '';
         const star = c.stars === 5 ? '🌟' : '✨';
-        return `${star} ${c.icon} **${c.name}**${dupText} — ${c.element} ${'⭐'.repeat(c.stars)}`;
+        return `${star} **${c.name}**${dupText} — ${c.element} ${'⭐'.repeat(c.stars)}`;
       }).join('\n')
     : 'No characters on this page.';
 
-  return {
-    color: highlightChar?.stars === 5 ? 0xFFD700 : 0x5865F2,
-    author: { name: `📦 ${target.username}'s Collection`, icon_url: target.displayAvatarURL() },
-    description: inventoryList,
-    thumbnail: { url: highlightChar?.image || target.displayAvatarURL() },
-    fields: [
+  const embed = new EmbedBuilder()
+    .setColor(highlightChar?.stars === 5 ? 0xFFD700 : 0x5865F2)
+    .setAuthor({ name: `📦 ${target.username}'s Collection`, iconURL: target.displayAvatarURL() })
+    .setDescription(inventoryList)
+    .setThumbnail(highlightChar?.image || target.displayAvatarURL())
+    .addFields(
       { name: '📊 Total Pulls', value: `${total}`, inline: true },
       { name: '🌟 5★', value: `${fiveStars}`, inline: true },
       { name: '✨ 4★', value: `${fourStars}`, inline: true },
       { name: '🎯 Unique', value: `${sorted.length}`, inline: true },
-      { name: '📄 Page', value: `${page} / ${totalPages}`, inline: true },
-    ],
-    footer: { text: '🎰 Keep pulling to grow your collection!' },
-    timestamp: new Date().toISOString()
-  };
-}
+      { name: '📄 Page', value: `${page} / ${totalPages}`, inline: true }
+    )
+    .setFooter({ text: '🎰 Keep pulling to grow your collection!' })
+    .setTimestamp();
 
-// ===== BUILD PAGE BUTTONS (with first/last) =====
-function buildCharListButtons(page) {
-  const totalPages = Math.ceil(sortedChars.length / CHARS_PER_PAGE);
-  return new ActionRowBuilder().addComponents(
-    new ButtonBuilder().setCustomId(`cl_first_1`).setLabel('|◀◀').setStyle(ButtonStyle.Primary).setDisabled(page <= 1),
-    new ButtonBuilder().setCustomId(`cl_prev_${page - 1}`).setLabel('◀').setStyle(ButtonStyle.Primary).setDisabled(page <= 1),
-    new ButtonBuilder().setCustomId(`cl_cur_${page}`).setLabel(`${page}/${totalPages}`).setStyle(ButtonStyle.Secondary).setDisabled(true),
-    new ButtonBuilder().setCustomId(`cl_next_${page + 1}`).setLabel('▶').setStyle(ButtonStyle.Primary).setDisabled(page >= totalPages),
-    new ButtonBuilder().setCustomId(`cl_last_${totalPages}`).setLabel('▶▶|').setStyle(ButtonStyle.Primary).setDisabled(page >= totalPages),
-  );
+  return embed;
 }
 
 function buildInvButtons(userId, page, totalPages) {
@@ -466,7 +469,11 @@ client.on('interactionCreate', async interaction => {
         const nextDaily = new Date(last.getTime() + 24 * 60 * 60 * 1000);
         const timeLeft = Math.ceil((nextDaily - now) / 1000 / 60 / 60);
         return interaction.reply({
-          embeds: [{ color: 0xFF5555, title: '⏰ Already Claimed!', description: `Come back in **${timeLeft} hour(s)**. ⏳\n\nNext reset: <t:${Math.floor(nextDaily.getTime() / 1000)}:R>` }]
+          embeds: [new EmbedBuilder()
+            .setColor(0xFF5555)
+            .setTitle('⏰ Already Claimed!')
+            .setDescription(`Come back in **${timeLeft} hour(s)**. ⏳\n\nNext reset: <t:${Math.floor(nextDaily.getTime() / 1000)}:R>`)
+          ]
         });
       }
       await Player.findOneAndUpdate(
@@ -475,13 +482,13 @@ client.on('interactionCreate', async interaction => {
       );
       const updated = await Player.findOne({ userId: interaction.user.id });
       return interaction.reply({
-        embeds: [{
-          color: 0xFFD700,
-          title: '💎 Daily Primogems Claimed!',
-          description: `You received **60 💎 Primogems!**\n\n**Total Balance:** ${updated.primogems} 💎\n\nCome back tomorrow for more! 🌟`,
-          thumbnail: { url: interaction.user.displayAvatarURL() },
-          footer: { text: 'Tip: Use /pull to wish for characters!' }
-        }]
+        embeds: [new EmbedBuilder()
+          .setColor(0xFFD700)
+          .setTitle('💎 Daily Primogems Claimed!')
+          .setDescription(`You received **60 💎 Primogems!**\n\n**Total Balance:** ${updated.primogems} 💎\n\nCome back tomorrow for more! 🌟`)
+          .setThumbnail(interaction.user.displayAvatarURL())
+          .setFooter({ text: 'Tip: Use /pull to wish for characters!' })
+        ]
       });
     }
 
@@ -491,22 +498,22 @@ client.on('interactionCreate', async interaction => {
       const primos = player?.primogems || 0;
       const pulls = Math.floor(primos / PULL_COST);
       return interaction.reply({
-        embeds: [{
-          color: 0x5865F2,
-          title: `💰 ${interaction.user.username}'s Balance`,
-          description: `**💎 Primogems:** ${primos}\n**✨ Pulls Available:** ${pulls}\n\nEarn more with **/daily** or **/buy**!`,
-          thumbnail: { url: interaction.user.displayAvatarURL() },
-        }]
+        embeds: [new EmbedBuilder()
+          .setColor(0x5865F2)
+          .setTitle(`💰 ${interaction.user.username}'s Balance`)
+          .setDescription(`**💎 Primogems:** ${primos}\n**✨ Pulls Available:** ${pulls}\n\nEarn more with **/daily** or **/buy**!`)
+          .setThumbnail(interaction.user.displayAvatarURL())
+        ]
       });
     }
 
     // ===== SHOP =====
     if (name === 'shop') {
       return interaction.reply({
-        embeds: [{
-          color: 0xFFD700,
-          title: '🛒 Primogem Shop',
-          description: [
+        embeds: [new EmbedBuilder()
+          .setColor(0xFFD700)
+          .setTitle('🛒 Primogem Shop')
+          .setDescription([
             '> Buy Primogems to wish for characters!\n',
             '**🆓 Free** — 💎 60 Primogems → `/daily` *(every 24h)*',
             '**💳 Buy** — 💎 Up to 20,000 per day → `/buy <amount>`',
@@ -515,9 +522,9 @@ client.on('interactionCreate', async interaction => {
             '> 💡 **10 Pulls = 1600 Primogems**',
             '> 💡 **Soft Pity starts at pull 74**',
             '> 💡 **Hard Pity = pull 90 (guaranteed 5★)**',
-          ].join('\n'),
-          footer: { text: 'Use /daily every day to earn free Primogems!' }
-        }]
+          ].join('\n'))
+          .setFooter({ text: 'Use /daily every day to earn free Primogems!' })
+        ]
       });
     }
 
@@ -529,17 +536,17 @@ client.on('interactionCreate', async interaction => {
       const pullsLeft = 90 - pity;
       const softPityIn = pity >= 74 ? 0 : 74 - pity;
       return interaction.reply({
-        embeds: [{
-          color: 0xA855F7,
-          title: `🎯 ${interaction.user.username}'s Pity`,
-          fields: [
+        embeds: [new EmbedBuilder()
+          .setColor(0xA855F7)
+          .setTitle(`🎯 ${interaction.user.username}'s Pity`)
+          .addFields(
             { name: '🔢 Current Pity', value: `${pity} / 90`, inline: true },
             { name: '🎰 Hard Pity In', value: `${pullsLeft} pulls`, inline: true },
             { name: '📈 Soft Pity In', value: softPityIn === 0 ? '✅ Active now!' : `${softPityIn} pulls`, inline: true },
-            { name: '🎲 50/50 Status', value: guaranteed ? '✅ **GUARANTEED** next 5★!' : '⚠️ On 50/50 (50% chance)', inline: false },
-          ],
-          footer: { text: 'Soft pity starts at pull 74 — higher chance of 5★!' }
-        }]
+            { name: '🎲 50/50 Status', value: guaranteed ? '✅ **GUARANTEED** next 5★!' : '⚠️ On 50/50 (50% chance)', inline: false }
+          )
+          .setFooter({ text: 'Soft pity starts at pull 74 — higher chance of 5★!' })
+        ]
       });
     }
 
@@ -552,7 +559,11 @@ client.on('interactionCreate', async interaction => {
       );
       if (player.primogems < PULL_COST) {
         return interaction.reply({
-          embeds: [{ color: 0xFF5555, title: '❌ Not Enough Primogems!', description: `You need **160 💎** to pull!\n\nYou have: **${player.primogems} 💎**\n\nGet more with **/daily** or **/buy**!` }]
+          embeds: [new EmbedBuilder()
+            .setColor(0xFF5555)
+            .setTitle('❌ Not Enough Primogems!')
+            .setDescription(`You need **160 💎** to pull!\n\nYou have: **${player.primogems} 💎**\n\nGet more with **/daily** or **/buy**!`)
+          ]
         });
       }
       const { char, is5Star } = doWish(player);
@@ -566,15 +577,15 @@ client.on('interactionCreate', async interaction => {
       );
       const updatedPlayer = await Player.findOne({ userId: interaction.user.id });
       return interaction.reply({
-        embeds: [{
-          color: char.color,
-          author: { name: '✨ Genshin Impact — Wish Result' },
-          title: `${char.icon} ${char.name}`,
-          description: `**Element:** ${char.element}\n**Rarity:** ${'⭐'.repeat(char.stars)}\n\n${is5Star ? '🎉 **RARE 5★ PULL! You got lucky!**' : '💫 A fine addition to your roster!'}\n\n💎 **Remaining:** ${updatedPlayer.primogems} | 🎯 **Pity:** ${updatedPlayer.pity}/90`,
-          image: { url: char.image },
-          footer: { text: is5Star ? '✦ 5★ Character Obtained!' : '✦ 4★ Character Obtained! | Added to /inventory' },
-          timestamp: new Date().toISOString()
-        }]
+        embeds: [new EmbedBuilder()
+          .setColor(char.color)
+          .setAuthor({ name: '✨ Genshin Impact — Wish Result' })
+          .setTitle(`${char.name}`)
+          .setDescription(`**Element:** ${char.element}\n**Rarity:** ${'⭐'.repeat(char.stars)}\n\n${is5Star ? '🎉 **RARE 5★ PULL! You got lucky!**' : '💫 A fine addition to your roster!'}\n\n💎 **Remaining:** ${updatedPlayer.primogems} | 🎯 **Pity:** ${updatedPlayer.pity}/90`)
+          .setImage(char.image)
+          .setFooter({ text: is5Star ? '✦ 5★ Character Obtained!' : '✦ 4★ Character Obtained! | Added to /inventory' })
+          .setTimestamp()
+        ]
       });
     }
 
@@ -588,7 +599,11 @@ client.on('interactionCreate', async interaction => {
       const cost = PULL_COST * 10;
       if (player.primogems < cost) {
         return interaction.reply({
-          embeds: [{ color: 0xFF5555, title: '❌ Not Enough Primogems!', description: `You need **1600 💎** for 10 pulls!\n\nYou have: **${player.primogems} 💎**\n\nGet more with **/daily** or **/buy**!` }]
+          embeds: [new EmbedBuilder()
+            .setColor(0xFF5555)
+            .setTitle('❌ Not Enough Primogems!')
+            .setDescription(`You need **1600 💎** for 10 pulls!\n\nYou have: **${player.primogems} 💎**\n\nGet more with **/daily** or **/buy**!`)
+          ]
         });
       }
 
@@ -616,28 +631,28 @@ client.on('interactionCreate', async interaction => {
       // Build the pull list — 5★ highlighted
       const pullList = results.map(r => {
         if (r.is5Star) {
-          return `✦ ${r.char.icon} **${r.char.name}** ⭐⭐⭐⭐⭐ — ${r.char.element} 🌟`;
+          return `✦ **${r.char.name}** ⭐⭐⭐⭐⭐ — ${r.char.element} 🌟`;
         }
-        return `${r.char.icon} ${r.char.name} ⭐⭐⭐⭐ — ${r.char.element}`;
+        return `**${r.char.name}** ⭐⭐⭐⭐ — ${r.char.element}`;
       }).join('\n');
 
       return interaction.reply({
-        embeds: [{
-          color: fiveStarResults.length > 0 ? 0xFFD700 : 0x5865F2,
-          author: { name: `✨ Genshin Impact — 10 Wish Results`, icon_url: interaction.user.displayAvatarURL() },
-          title: fiveStarResults.length > 0
+        embeds: [new EmbedBuilder()
+          .setColor(fiveStarResults.length > 0 ? 0xFFD700 : 0x5865F2)
+          .setAuthor({ name: `✨ Genshin Impact — 10 Wish Results`, iconURL: interaction.user.displayAvatarURL() })
+          .setTitle(fiveStarResults.length > 0
             ? `🎉 ${fiveStarResults.map(r => r.char.name).join(', ')} obtained!`
-            : '💫 10 Wishes Complete!',
-          description: pullList,
-          thumbnail: { url: featuredChar.image },
-          fields: [
+            : '💫 10 Wishes Complete!')
+          .setDescription(pullList)
+          .setThumbnail(featuredChar.image)
+          .addFields(
             { name: '💎 Primogems Left', value: `${updatedPlayer.primogems}`, inline: true },
             { name: '🎯 Current Pity', value: `${updatedPlayer.pity}/90`, inline: true },
-            { name: '🌟 5★ Obtained', value: fiveStarResults.length > 0 ? fiveStarResults.map(r => `${r.char.icon} ${r.char.name}`).join(', ') : 'None this time...', inline: true },
-          ],
-          footer: { text: fiveStarResults.length > 0 ? `✦ Rare character(s) added to your inventory!` : 'No 5★ this time... Keep wishing! Use /pull10 again' },
-          timestamp: new Date().toISOString()
-        }]
+            { name: '🌟 5★ Obtained', value: fiveStarResults.length > 0 ? fiveStarResults.map(r => `${r.char.name}`).join(', ') : 'None this time...', inline: true }
+          )
+          .setFooter({ text: fiveStarResults.length > 0 ? `✦ Rare character(s) added to your inventory!` : 'No 5★ this time... Keep wishing! Use /pull10 again' })
+          .setTimestamp()
+        ]
       });
     }
 
@@ -649,14 +664,14 @@ client.on('interactionCreate', async interaction => {
 
       if (!data || data.characters.length === 0) {
         return interaction.editReply({
-          embeds: [{
-            color: 0x5865F2,
-            title: `📦 ${target.username}'s Collection`,
-            description: target.id === interaction.user.id
+          embeds: [new EmbedBuilder()
+            .setColor(0x5865F2)
+            .setTitle(`📦 ${target.username}'s Collection`)
+            .setDescription(target.id === interaction.user.id
               ? "You haven't pulled any characters yet!\nUse **/pull** to start your collection! ✨"
-              : `**${target.username}** hasn't pulled any characters yet!`,
-            thumbnail: { url: target.displayAvatarURL({ size: 256 }) }
-          }]
+              : `**${target.username}** hasn't pulled any characters yet!`)
+            .setThumbnail(target.displayAvatarURL({ size: 256 }))
+          ]
         });
       }
 
@@ -677,11 +692,11 @@ client.on('interactionCreate', async interaction => {
     // ===== GIFT =====
     if (name === 'gift') {
       if (!OWNERS.includes(interaction.user.id)) {
-        return interaction.reply({ embeds: [{ color: 0xFF5555, title: '❌ Owner Only!', description: 'Only the bot owner can use this command.' }], ephemeral: true });
+        return interaction.reply({ embeds: [new EmbedBuilder().setColor(0xFF5555).setTitle('❌ Owner Only!').setDescription('Only the bot owner can use this command.')], ephemeral: true });
       }
       const target = interaction.options.getUser('user');
       const amount = interaction.options.getInteger('amount');
-      if (amount <= 0) return interaction.reply({ embeds: [{ color: 0xFF5555, title: '❌ Invalid Amount!' }], ephemeral: true });
+      if (amount <= 0) return interaction.reply({ embeds: [new EmbedBuilder().setColor(0xFF5555).setTitle('❌ Invalid Amount!')], ephemeral: true });
       await Player.findOneAndUpdate(
         { userId: target.id },
         { $setOnInsert: { username: target.username, primogems: 0, pity: 0, guaranteed: false, lastDaily: null, characters: [] } },
@@ -693,12 +708,12 @@ client.on('interactionCreate', async interaction => {
         { new: true }
       );
       return interaction.reply({
-        embeds: [{
-          color: 0x00FF00,
-          title: '🎁 Primogems Gifted!',
-          description: `Successfully gifted **${amount} 💎** to **${target.username}**!\n\n**Their New Balance:** ${updated.primogems} 💎`,
-          thumbnail: { url: target.displayAvatarURL() },
-        }]
+        embeds: [new EmbedBuilder()
+          .setColor(0x00FF00)
+          .setTitle('🎁 Primogems Gifted!')
+          .setDescription(`Successfully gifted **${amount} 💎** to **${target.username}**!\n\n**Their New Balance:** ${updated.primogems} 💎`)
+          .setThumbnail(target.displayAvatarURL())
+        ]
       });
     }
 
@@ -710,7 +725,7 @@ client.on('interactionCreate', async interaction => {
         { upsert: true, new: true }
       );
       const amount = interaction.options.getInteger('amount');
-      if (amount <= 0) return interaction.reply({ embeds: [{ color: 0xFF5555, title: '❌ Invalid Amount!' }], ephemeral: true });
+      if (amount <= 0) return interaction.reply({ embeds: [new EmbedBuilder().setColor(0xFF5555).setTitle('❌ Invalid Amount!')], ephemeral: true });
 
       const now = new Date();
       const lastBuy = player.lastBuy ? new Date(player.lastBuy) : null;
@@ -721,11 +736,11 @@ client.on('interactionCreate', async interaction => {
       if (boughtToday + amount > BUY_LIMIT) {
         const remaining = BUY_LIMIT - boughtToday;
         return interaction.reply({
-          embeds: [{
-            color: 0xFF5555,
-            title: '❌ Daily Limit Exceeded!',
-            description: `Max **${BUY_LIMIT} 💎** per 24 hours.\n\n**Bought today:** ${boughtToday} 💎\n**Still available:** ${remaining} 💎\n**Resets:** <t:${Math.floor((lastBuy.getTime() + 24 * 60 * 60 * 1000) / 1000)}:R>`,
-          }],
+          embeds: [new EmbedBuilder()
+            .setColor(0xFF5555)
+            .setTitle('❌ Daily Limit Exceeded!')
+            .setDescription(`Max **${BUY_LIMIT} 💎** per 24 hours.\n\n**Bought today:** ${boughtToday} 💎\n**Still available:** ${remaining} 💎\n**Resets:** <t:${Math.floor((lastBuy.getTime() + 24 * 60 * 60 * 1000) / 1000)}:R>`)
+          ],
           ephemeral: true
         });
       }
@@ -737,13 +752,13 @@ client.on('interactionCreate', async interaction => {
       );
       const nextReset = new Date(now.getTime() + 24 * 60 * 60 * 1000);
       return interaction.reply({
-        embeds: [{
-          color: 0x00FF00,
-          title: '✅ Purchase Successful!',
-          description: `You got **${amount} 💎 Primogems!**\n\n**New Balance:** ${updated.primogems} 💎\n**Bought Today:** ${updated.boughtToday} / ${BUY_LIMIT} 💎\n**Next Reset:** <t:${Math.floor(nextReset.getTime() / 1000)}:R>`,
-          thumbnail: { url: interaction.user.displayAvatarURL() },
-          footer: { text: 'Use /pull to wish for characters!' }
-        }]
+        embeds: [new EmbedBuilder()
+          .setColor(0x00FF00)
+          .setTitle('✅ Purchase Successful!')
+          .setDescription(`You got **${amount} 💎 Primogems!**\n\n**New Balance:** ${updated.primogems} 💎\n**Bought Today:** ${updated.boughtToday} / ${BUY_LIMIT} 💎\n**Next Reset:** <t:${Math.floor(nextReset.getTime() / 1000)}:R>`)
+          .setThumbnail(interaction.user.displayAvatarURL())
+          .setFooter({ text: 'Use /pull to wish for characters!' })
+        ]
       });
     }
 
@@ -751,7 +766,11 @@ client.on('interactionCreate', async interaction => {
     if (name === 'avatar') {
       const target = interaction.options.getUser('user') || interaction.user;
       return interaction.reply({
-        embeds: [{ color: 0x5865F2, title: `🖼️ ${target.username}'s Avatar`, image: { url: target.displayAvatarURL({ size: 512 }) } }]
+        embeds: [new EmbedBuilder()
+          .setColor(0x5865F2)
+          .setTitle(`🖼️ ${target.username}'s Avatar`)
+          .setImage(target.displayAvatarURL({ size: 512 }))
+        ]
       });
     }
 
@@ -767,36 +786,36 @@ client.on('interactionCreate', async interaction => {
       const target = interaction.options.getUser('user') || interaction.user;
       const member = interaction.guild.members.cache.get(target.id);
       return interaction.reply({
-        embeds: [{
-          color: 0x5865F2,
-          title: `👤 ${target.username}`,
-          thumbnail: { url: target.displayAvatarURL() },
-          fields: [
+        embeds: [new EmbedBuilder()
+          .setColor(0x5865F2)
+          .setTitle(`👤 ${target.username}`)
+          .setThumbnail(target.displayAvatarURL())
+          .addFields(
             { name: '🆔 User ID', value: target.id, inline: true },
             { name: '🤖 Bot?', value: target.bot ? 'Yes' : 'No', inline: true },
             { name: '📅 Account Created', value: `<t:${Math.floor(target.createdTimestamp / 1000)}:D>`, inline: true },
-            { name: '📥 Joined Server', value: member ? `<t:${Math.floor(member.joinedTimestamp / 1000)}:D>` : 'Unknown', inline: true },
-          ]
-        }]
+            { name: '📥 Joined Server', value: member ? `<t:${Math.floor(member.joinedTimestamp / 1000)}:D>` : 'Unknown', inline: true }
+          )
+        ]
       });
     }
 
     if (name === 'serverinfo') {
       const g = interaction.guild;
       return interaction.reply({
-        embeds: [{
-          color: 0x5865F2,
-          title: `📊 ${g.name}`,
-          thumbnail: { url: g.iconURL() },
-          fields: [
+        embeds: [new EmbedBuilder()
+          .setColor(0x5865F2)
+          .setTitle(`📊 ${g.name}`)
+          .setThumbnail(g.iconURL())
+          .addFields(
             { name: '👑 Owner', value: `<@${g.ownerId}>`, inline: true },
             { name: '👥 Members', value: `${g.memberCount}`, inline: true },
             { name: '📺 Channels', value: `${g.channels.cache.size}`, inline: true },
             { name: '🎭 Roles', value: `${g.roles.cache.size}`, inline: true },
             { name: '🚀 Boosts', value: `${g.premiumSubscriptionCount ?? 0}`, inline: true },
             { name: '🆔 Server ID', value: g.id }
-          ]
-        }]
+          )
+        ]
       });
     }
 
@@ -804,13 +823,13 @@ client.on('interactionCreate', async interaction => {
       const target = interaction.options.getUser('user');
       const roast = roasts[Math.floor(Math.random() * roasts.length)];
       return interaction.reply({
-        embeds: [{
-          color: 0xFF4500,
-          title: `🔥 Roasting ${target.username}...`,
-          description: roast,
-          thumbnail: { url: target.displayAvatarURL({ size: 256 }) },
-          footer: { text: 'Just a joke, no harm intended 😄' }
-        }]
+        embeds: [new EmbedBuilder()
+          .setColor(0xFF4500)
+          .setTitle(`🔥 Roasting ${target.username}...`)
+          .setDescription(roast)
+          .setThumbnail(target.displayAvatarURL({ size: 256 }))
+          .setFooter({ text: 'Just a joke, no harm intended 😄' })
+        ]
       });
     }
 
@@ -825,12 +844,12 @@ client.on('interactionCreate', async interaction => {
       else if (percentage <= 80) { message = 'Great chemistry! 💕'; color = 0xFF69B4; }
       else { message = 'SOULMATES! Made for each other 💞'; color = 0xFF0000; }
       return interaction.reply({
-        embeds: [{
-          color,
-          title: `❤️ Love Meter`,
-          description: `**${user1.username}** ❤️ **${user2.username}**\n\n**${percentage}% compatibility!**\n\n${message}`,
-          thumbnail: { url: user1.displayAvatarURL({ size: 256 }) }
-        }]
+        embeds: [new EmbedBuilder()
+          .setColor(color)
+          .setTitle(`❤️ Love Meter`)
+          .setDescription(`**${user1.username}** ❤️ **${user2.username}**\n\n**${percentage}% compatibility!**\n\n${message}`)
+          .setThumbnail(user1.displayAvatarURL({ size: 256 }))
+        ]
       });
     }
 
