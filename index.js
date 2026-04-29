@@ -266,7 +266,16 @@ function buildInventoryEmbed(target, data, page, totalPages) {
   const charCounts = {};
   for (const c of data.characters) {
     if (!c || !c.name || !c.stars) continue;
-    if (!charCounts[c.name]) charCounts[c.name] = { name: c.name, stars: c.stars, element: c.element, icon: c.icon, image: c.image, count: 0 };
+    if (!charCounts[c.name]) {
+      charCounts[c.name] = {
+        name: c.name,
+        stars: c.stars,
+        element: c.element,
+        icon: c.icon,
+        image: c.image,
+        count: 0
+      };
+    }
     charCounts[c.name].count++;
   }
 
@@ -283,13 +292,9 @@ function buildInventoryEmbed(target, data, page, totalPages) {
   const inventoryList = shown.length > 0
     ? shown.map(c => {
         const dupText = c.count > 1 ? ` ×${c.count}` : '';
-        const star = c.stars === 5 ? '✦' : '✧';
-        const elementEmoji = {
-          'Pyro': '🔥', 'Hydro': '💧', 'Electro': '⚡', 'Cryo': '❄️',
-          'Anemo': '🌪️', 'Geo': '🪨', 'Dendro': '🌿'
-        }[c.element] || '✨';
-        return `${star} **${c.name}**${dupText} — ${elementEmoji} ${c.element} ${'⭐'.repeat(c.stars)}`;
-      }).join('\n')
+        return `**${c.name}**${dupText}
+[🖼️ Icon](${c.icon}) • ${c.element} • ${'⭐'.repeat(c.stars)}`;
+      }).join('\n\n')
     : 'No characters on this page.';
 
   const embed = new EmbedBuilder()
@@ -297,15 +302,15 @@ function buildInventoryEmbed(target, data, page, totalPages) {
     .setAuthor({ name: `📦 ${target.username}'s Collection`, iconURL: target.displayAvatarURL() })
     .setDescription(inventoryList)
     .setThumbnail(highlightChar?.image || target.displayAvatarURL())
+    .setImage(highlightChar?.image || null)
     .addFields(
       { name: '📊 Total Pulls', value: `**${total}**`, inline: true },
       { name: '🌟 5★ Characters', value: `**${fiveStars}**`, inline: true },
       { name: '✨ 4★ Characters', value: `**${fourStars}**`, inline: true },
       { name: '🎯 Unique', value: `**${sorted.length}**`, inline: true },
-      { name: '📄 Page', value: `**${page} / ${totalPages}**`, inline: true },
-      { name: '💎 Avg Per Page', value: `**${Math.round(total / totalPages)}**`, inline: true }
+      { name: '📄 Page', value: `**${page} / ${totalPages}**`, inline: true }
     )
-    .setFooter({ text: '✦ Keep pulling to grow your collection! Use /pull or /pull10' })
+    .setFooter({ text: 'Use /pull or /pull10 to get more characters!' })
     .setTimestamp();
 
   return embed;
@@ -313,53 +318,28 @@ function buildInventoryEmbed(target, data, page, totalPages) {
 
 // ===== BUILD PULL10 EMBED (UPGRADED) =====
 function buildPull10Embed(interaction, results, updatedPlayer) {
-  const fiveStarResults = results.filter(r => r.is5Star);
-  const fourStarResults = results.filter(r => !r.is5Star);
-  const featuredChar = fiveStarResults.length > 0 ? fiveStarResults[0].char : results[0].char;
-
-  // Organize pulls by rarity
-  const fiveStarList = fiveStarResults.map(r => 
-    `✦ **${r.char.name}** ⭐⭐⭐⭐⭐ — ${r.char.element}`
-  ).join('\n');
-
-  const fourStarList = fourStarResults.map(r => 
-    `✧ ${r.char.name} ⭐⭐⭐⭐ — ${r.char.element}`
-  ).join('\n');
-
-  const pullResultsDisplay = [
-    fiveStarList ? `🌟 **5★ RESULTS:**\n${fiveStarList}` : '',
-    fourStarList ? `✨ **4★ RESULTS:**\n${fourStarList}` : ''
-  ].filter(Boolean).join('\n\n');
-
   const embed = new EmbedBuilder()
-    .setColor(fiveStarResults.length > 0 ? 0xFFD700 : 0x5865F2)
+    .setColor(0xFFD700)
     .setAuthor({ 
-      name: `✨ Genshin Impact — 10 Wish Results`, 
-      iconURL: interaction.user.displayAvatarURL() 
+      name: `✨ Genshin Impact — 10 Wish Results`,
+      iconURL: interaction.user.displayAvatarURL()
     })
-    .setTitle(
-      fiveStarResults.length > 0 
-        ? `🎉 ${fiveStarResults.map(r => r.char.name).join(', ')} obtained!`
-        : '💫 10 Wishes Complete!'
-    )
-    .setDescription(pullResultsDisplay || 'All pulls were 4★ characters!')
-    .setThumbnail(featuredChar.image)
-    .addFields(
-      { name: '💎 Primogems Left', value: `**${updatedPlayer.primogems}**`, inline: true },
-      { name: '🎯 Current Pity', value: `**${updatedPlayer.pity}/90**`, inline: true },
-      { name: '🌟 5★ Obtained', value: `**${fiveStarResults.length}**`, inline: true },
-      { name: '✨ 4★ Obtained', value: `**${fourStarResults.length}**`, inline: true },
-      { name: '🎪 Featured', value: fiveStarResults.length > 0 
-        ? `**${fiveStarResults.map(r => r.char.name).join(', ')}**` 
-        : 'None', inline: true },
-      { name: '📊 Pull Stats', value: `**Rarity:** ${(fiveStarResults.length / 10 * 100).toFixed(1)}%`, inline: true }
-    )
-    .setFooter({ 
-      text: fiveStarResults.length > 0 
-        ? `✦ ${fiveStarResults.length} rare character(s) added to your inventory!` 
-        : 'Keep wishing! Use /pull10 again for better luck' 
-    })
+    .setTitle('🎉 Your 10 Pull Results')
     .setTimestamp();
+
+  results.forEach((r, i) => {
+    const stars = '⭐'.repeat(r.char.stars);
+    embed.addFields({
+      name: `${i + 1}. ${r.char.name} (${stars})`,
+      value: `[🖼️ Icon](${r.char.icon}) • ${r.char.element}`,
+      inline: true
+    });
+  });
+
+  embed.addFields(
+    { name: '💎 Primogems Left', value: `**${updatedPlayer.primogems}**`, inline: true },
+    { name: '🎯 Pity', value: `**${updatedPlayer.pity}/90**`, inline: true }
+  );
 
   return embed;
 }
