@@ -311,26 +311,33 @@ function buildInventoryEmbed(target, data, page, totalPages) {
 function buildPull10Embed(interaction, results, updatedPlayer) {
   const embeds = [];
 
-  for (let i = 0; i < results.length; i++) {
+  // First 9 pulls
+  for (let i = 0; i < 9; i++) {
     const r = results[i];
 
     embeds.push(
       new EmbedBuilder()
         .setColor(r.char.color)
         .setTitle(`${i + 1}. ${r.char.name}`)
-        .setDescription(`${r.char.element} • ${'⭐'.repeat(r.char.stars)}`)
+        .setDescription(`**${r.char.element}** • ${'⭐'.repeat(r.char.stars)}`)
         .setThumbnail(r.char.icon)
     );
   }
 
+  // Last pull + summary
+  const last = results[9];
+
   embeds.push(
     new EmbedBuilder()
-      .setColor(0xFFD700)
-      .setTitle('📊 Summary')
-      .addFields(
-        { name: '💎 Primogems', value: `${updatedPlayer.primogems}`, inline: true },
-        { name: '🎯 Pity', value: `${updatedPlayer.pity}/90`, inline: true }
+      .setColor(last.char.color)
+      .setTitle(`10. ${last.char.name}`)
+      .setDescription(
+        `**${last.char.element}** • ${'⭐'.repeat(last.char.stars)}\n\n` +
+        `💎 **Primogems:** ${updatedPlayer.primogems}\n` +
+        `🎯 **Pity:** ${updatedPlayer.pity}/90`
       )
+      .setThumbnail(last.char.icon)
+      .setFooter({ text: 'Pull 10/10 • Summary' })
   );
 
   return embeds;
@@ -588,6 +595,11 @@ client.on('interactionCreate', async interaction => {
         }
       );
       const updatedPlayer = await Player.findOne({ userId: interaction.user.id });
+      const embeds = buildPull10Embed(interaction, results, updatedPlayer);
+
+      return interaction.reply({
+        embeds: embeds
+      });
       return interaction.reply({
         embeds: [new EmbedBuilder()
           .setColor(char.color)
