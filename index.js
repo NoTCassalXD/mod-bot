@@ -260,21 +260,13 @@ function buildCharListEmbed(page) {
 // ===== BUILD INVENTORY EMBED (UPGRADED) =====
 function buildInventoryEmbed(target, data, page, totalPages) {
   const total = data.characters.length;
-  const fiveStars = data.characters.filter(c => c && c.stars === 5).length;
-  const fourStars = data.characters.filter(c => c && c.stars === 4).length;
+  const fiveStars = data.characters.filter(c => c.stars === 5).length;
+  const fourStars = data.characters.filter(c => c.stars === 4).length;
 
   const charCounts = {};
   for (const c of data.characters) {
-    if (!c || !c.name || !c.stars) continue;
     if (!charCounts[c.name]) {
-      charCounts[c.name] = {
-        name: c.name,
-        stars: c.stars,
-        element: c.element,
-        icon: c.icon,
-        image: c.image,
-        count: 0
-      };
+      charCounts[c.name] = { ...c, count: 0 };
     }
     charCounts[c.name].count++;
   }
@@ -287,61 +279,61 @@ function buildInventoryEmbed(target, data, page, totalPages) {
   const perPage = 10;
   const start = (page - 1) * perPage;
   const shown = sorted.slice(start, start + perPage);
-  const highlightChar = shown.find(c => c.stars === 5) || shown[0];
 
-  const inventoryList = shown.length > 0
-    ? shown.map(c => {
-        const dupText = c.count > 1 ? ` ×${c.count}` : '';
-        return `**${c.name}**${dupText}
-[🖼️ Icon](${c.icon}) • ${c.element} • ${'⭐'.repeat(c.stars)}`;
-      }).join('\n\n')
-    : 'No characters on this page.';
+  const highlight = shown.find(c => c.stars === 5) || shown[0];
 
-  const embed = new EmbedBuilder()
-    .setColor(highlightChar?.stars === 5 ? 0xFFD700 : 0x5865F2)
-    .setAuthor({ name: `📦 ${target.username}'s Collection`, iconURL: target.displayAvatarURL() })
-    .setDescription(inventoryList)
-    .setThumbnail(highlightChar?.image || target.displayAvatarURL())
-    .setImage(highlightChar?.image || null)
+  const list = shown.map(c => {
+    const dup = c.count > 1 ? ` ×${c.count}` : '';
+    return `${c.icon} **${c.name}**${dup}\n${c.element} • ${'⭐'.repeat(c.stars)}`;
+  }).join('\n\n');
+
+  return new EmbedBuilder()
+    .setColor(highlight?.color || 0x5865F2)
+    .setAuthor({
+      name: `📦 ${target.username}'s Inventory`,
+      iconURL: target.displayAvatarURL()
+    })
+    .setDescription(list || 'No characters.')
+    .setThumbnail(highlight?.icon) // ✅ FIXED ICON
+    .setImage(highlight?.image)
     .addFields(
-      { name: '📊 Total Pulls', value: `**${total}**`, inline: true },
-      { name: '🌟 5★ Characters', value: `**${fiveStars}**`, inline: true },
-      { name: '✨ 4★ Characters', value: `**${fourStars}**`, inline: true },
-      { name: '🎯 Unique', value: `**${sorted.length}**`, inline: true },
-      { name: '📄 Page', value: `**${page} / ${totalPages}**`, inline: true }
+      { name: '🎯 Total', value: `${total}`, inline: true },
+      { name: '🌟 5★', value: `${fiveStars}`, inline: true },
+      { name: '✨ 4★', value: `${fourStars}`, inline: true },
+      { name: '🧩 Unique', value: `${sorted.length}`, inline: true },
+      { name: '📄 Page', value: `${page}/${totalPages}`, inline: true }
     )
-    .setFooter({ text: 'Use /pull or /pull10 to get more characters!' })
+    .setFooter({ text: 'Use /pull or /pull10 to get more characters' })
     .setTimestamp();
-
-  return embed;
 }
 
 // ===== BUILD PULL10 EMBED (UPGRADED) =====
 function buildPull10Embed(interaction, results, updatedPlayer) {
-  const embed = new EmbedBuilder()
-    .setColor(0xFFD700)
-    .setAuthor({ 
-      name: `✨ Genshin Impact — 10 Wish Results`,
-      iconURL: interaction.user.displayAvatarURL()
-    })
-    .setTitle('🎉 Your 10 Pull Results')
-    .setTimestamp();
+  const embeds = [];
 
-  results.forEach((r, i) => {
-    const stars = '⭐'.repeat(r.char.stars);
-    embed.addFields({
-      name: `${i + 1}. ${r.char.name} (${stars})`,
-      value: `[🖼️ Icon](${r.char.icon}) • ${r.char.element}`,
-      inline: true
-    });
-  });
+  for (let i = 0; i < results.length; i++) {
+    const r = results[i];
 
-  embed.addFields(
-    { name: '💎 Primogems Left', value: `**${updatedPlayer.primogems}**`, inline: true },
-    { name: '🎯 Pity', value: `**${updatedPlayer.pity}/90**`, inline: true }
+    embeds.push(
+      new EmbedBuilder()
+        .setColor(r.char.color)
+        .setTitle(`${i + 1}. ${r.char.name}`)
+        .setDescription(`${r.char.element} • ${'⭐'.repeat(r.char.stars)}`)
+        .setThumbnail(r.char.icon)
+    );
+  }
+
+  embeds.push(
+    new EmbedBuilder()
+      .setColor(0xFFD700)
+      .setTitle('📊 Summary')
+      .addFields(
+        { name: '💎 Primogems', value: `${updatedPlayer.primogems}`, inline: true },
+        { name: '🎯 Pity', value: `${updatedPlayer.pity}/90`, inline: true }
+      )
   );
 
-  return embed;
+  return embeds;
 }
 
 // ===== BUILD PAGE BUTTONS =====
@@ -415,7 +407,8 @@ client.on('interactionCreate', async interaction => {
 
   // ===== BUTTON HANDLER =====
   if (interaction.isButton()) {
-    try {
+    try { 
+      if (!interaction.deferred) await interaction.deferUpdate(); 
       const parts = interaction.customId.split('_');
 
       // Character list buttons
@@ -425,8 +418,7 @@ client.on('interactionCreate', async interaction => {
         const clampedPage = Math.max(1, Math.min(page, totalPages));
         const embed = buildCharListEmbed(clampedPage);
         const row = buildCharListButtons(clampedPage);
-        return interaction.update({ embeds: [embed], components: [row] });
-      }
+        return interaction.editReply({ embeds: [embed], components: [row] });
 
       // Inventory buttons
       if (parts[0] === 'inv' && parts[1] !== 'cur') {
@@ -645,10 +637,10 @@ client.on('interactionCreate', async interaction => {
       );
 
       const updatedPlayer = await Player.findOne({ userId: interaction.user.id });
-      const embed = buildPull10Embed(interaction, results, updatedPlayer);
-      
+      const embeds = buildPull10Embed(interaction, results, updatedPlayer);
+
       return interaction.reply({
-        embeds: [embed]
+      embeds: embeds
       });
     }
 
