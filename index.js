@@ -315,10 +315,11 @@ function buildPull10Embed(user, results, updatedPlayer) {
   const pullList = results.map((r, i) => {
     const elem = elementEmoji[r.char.element] || '✨';
     const stars = '⭐'.repeat(r.char.stars);
+    const icon = r.char.icon;
     if (r.is5Star) {
-      return `✦ **${r.char.name}** ${stars} — ${elem} ${r.char.element} 🌟`;
+      return `✦ [${r.char.name}](${icon}) **${r.char.name}** ${stars} — ${elem} ${r.char.element} 🌟`;
     }
-    return `${r.char.name} ${stars} — ${elem} ${r.char.element}`;
+    return `[${r.char.name}](${icon}) **${r.char.name}** ${stars} — ${elem} ${r.char.element}`;
   }).join('\n');
 
   return new EmbedBuilder()
@@ -364,7 +365,6 @@ function buildInvButtons(userId, page, totalPages) {
 const commands = [
   new SlashCommandBuilder().setName('pull').setDescription('Pull a Genshin character (costs 160 💎)'),
   new SlashCommandBuilder().setName('pull10').setDescription('Pull 10 times (costs 1600 💎)'),
-  new SlashCommandBuilder().setName('pity').setDescription('Check your current pity count 🎯'),
   new SlashCommandBuilder().setName('daily').setDescription('Claim your daily 60 Primogems 💎'),
   new SlashCommandBuilder().setName('balance').setDescription('Check your Primogem balance 💰'),
   new SlashCommandBuilder().setName('shop').setDescription('View the Primogem shop 🛒'),
@@ -522,23 +522,6 @@ client.on('interactionCreate', async interaction => {
       });
     }
 
-    if (name === 'pity') {
-      const player = await Player.findOne({ userId: interaction.user.id });
-      const pity = player?.pity || 0;
-      const guaranteed = player?.guaranteed || false;
-      const pullsLeft = 90 - pity;
-      const softPityIn = pity >= 74 ? 0 : 74 - pity;
-      return interaction.reply({
-        embeds: [new EmbedBuilder().setColor(0xA855F7).setTitle(`🎯 ${interaction.user.username}'s Pity`)
-          .addFields(
-            { name: '🔢 Current Pity', value: `${pity} / 90`, inline: true },
-            { name: '🎰 Hard Pity In', value: `${pullsLeft} pulls`, inline: true },
-            { name: '📈 Soft Pity In', value: softPityIn === 0 ? '✅ Active now!' : `${softPityIn} pulls`, inline: true },
-            { name: '🎲 50/50 Status', value: guaranteed ? '✅ **GUARANTEED** next 5★!' : '⚠️ On 50/50 (50% chance)', inline: false }
-          )
-          .setFooter({ text: 'Soft pity starts at pull 74 — higher chance of 5★!' })]
-      });
-    }
 
     if (name === 'pull') {
       let player = await Player.findOneAndUpdate(
@@ -609,9 +592,19 @@ client.on('interactionCreate', async interaction => {
     }
 
     if (name === 'inventory') {
-      await interaction.deferReply();
+      try {
+        await interaction.deferReply();
+      } catch (e) {
+        console.error('Defer failed:', e);
+      }
       const target = interaction.options.getUser('user') || interaction.user;
-      const data = await Player.findOne({ userId: target.id });
+      let data;
+      try {
+        data = await Player.findOne({ userId: target.id });
+      } catch (e) {
+        console.error('DB error:', e);
+        return interaction.editReply({ content: '❌ Database error. Please try again.', ephemeral: true });
+      }
       if (!data || data.characters.length === 0) {
         return interaction.editReply({
           embeds: [new EmbedBuilder().setColor(0x5865F2).setTitle(`📦 ${target.username}'s Collection`)
