@@ -660,7 +660,7 @@ client.on('interactionCreate', async interaction => {
         return interaction.reply({ content: '❌ Database error. Please try again.', ephemeral: true });
       }
       if (!data || data.characters.length === 0) {
-        return interaction.editReply({
+        return interaction.reply({
           embeds: [new EmbedBuilder().setColor(0x5865F2).setTitle(`📦 ${target.username}'s Collection`)
             .setDescription(target.id === interaction.user.id
               ? "You haven't pulled any characters yet!\nUse **/pull** to start your collection! ✨"
