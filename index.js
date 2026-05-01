@@ -254,7 +254,7 @@ function buildCharListEmbed(page) {
     const l = arr[arr.length - 1].name[0].toUpperCase();
     return f === l ? `(${f})` : `(${f}–${l})`;
   };
-  const formatCol = (arr) => arr.length ? arr.map(c => `${elementEmoji[c.element] || '✨'} ${c.name}`).join('\n') : '\u200b';
+  const formatCol = (arr) => arr.length ? arr.map(c => `[${c.name}](${c.icon}) ${c.name}`).join('\n') : '\u200b';
   const endIndex = Math.min(start + CHARS_PER_PAGE, sortedChars.length);
   return new EmbedBuilder()
     .setColor(0x5865F2)
@@ -315,11 +315,10 @@ function buildPull10Embed(user, results, updatedPlayer) {
   const pullList = results.map((r, i) => {
     const elem = elementEmoji[r.char.element] || '✨';
     const stars = '⭐'.repeat(r.char.stars);
-    const icon = r.char.icon;
     if (r.is5Star) {
-      return `✦ [${r.char.name}](${icon}) **${r.char.name}** ${stars} — ${elem} ${r.char.element} 🌟`;
+      return `✦ [${r.char.name}](${r.char.icon}) **${r.char.name}** ${stars} — ${elem} ${r.char.element} 🌟`;
     }
-    return `[${r.char.name}](${icon}) **${r.char.name}** ${stars} — ${elem} ${r.char.element}`;
+    return `[${r.char.name}](${r.char.icon}) **${r.char.name}** ${stars} — ${elem} ${r.char.element}`;
   }).join('\n');
 
   return new EmbedBuilder()
@@ -592,19 +591,9 @@ client.on('interactionCreate', async interaction => {
     }
 
     if (name === 'inventory') {
-      try {
-        await interaction.deferReply();
-      } catch (e) {
-        console.error('Defer failed:', e);
-      }
+      await interaction.deferReply();
       const target = interaction.options.getUser('user') || interaction.user;
-      let data;
-      try {
-        data = await Player.findOne({ userId: target.id });
-      } catch (e) {
-        console.error('DB error:', e);
-        return interaction.editReply({ content: '❌ Database error. Please try again.', ephemeral: true });
-      }
+      const data = await Player.findOne({ userId: target.id });
       if (!data || data.characters.length === 0) {
         return interaction.editReply({
           embeds: [new EmbedBuilder().setColor(0x5865F2).setTitle(`📦 ${target.username}'s Collection`)
