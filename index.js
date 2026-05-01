@@ -61,6 +61,66 @@ const elementEmoji = {
   Pyro: '🔥', Hydro: '💧', Electro: '⚡', Cryo: '❄️',
   Anemo: '🌀', Geo: '🪨', Dendro: '🌿'
 };
+// ===== CHARACTER EMOJIS (ADD YOUR CUSTOM EMOJIS HERE) =====
+// Format: 'CharacterName': '<:emojiName:emojiID>'
+// Upload emoji to your Discord server, right-click → Copy ID (Developer Mode)
+const charEmoji = {
+  // MONDSTADT 5★
+  Albedo: '<:albedo:0>', Aloy: '<:aloy:0>', Diluc: '<:diluc:0>', Eula: '<:eula:0>',
+  Jean: '<:jean:0>', Klee: '<:klee:0>', Mona: '<:mona:0>', Venti: '<:venti:0>',
+  // MONDSTADT 4★
+  Amber: '<:amber:0>', Barbara: '<:barbara:0>', Bennett: '<:bennett:0>', Diona: '<:diona:0>',
+  Fischl: '<:fischl:0>', Kaeya: '<:kaeya:0>', Lisa: '<:lisa:0>', Mika: '<:mika:0>',
+  Noelle: '<:noelle:0>', Razor: '<:razor:0>', Rosaria: '<:rosaria:0>', Sucrose: '<:sucrose:0>',
+  // LIYUE 5★
+  Baizhu: '<:baizhu:0>', Ganyu: '<:ganyu:0>', 'Hu Tao': '<:hutao:0>', Keqing: '<:keqing:0>',
+  Qiqi: '<:qiqi:0>', Shenhe: '<:shenhe:0>', Xiao: '<:xiao:0>', Xianyun: '<:xianyun:0>',
+  Yelan: '<:yelan:0>', Zhongli: '<:zhongli:0>',
+  // LIYUE 4★
+  Beidou: '<:beidou:0>', Chongyun: '<:chongyun:0>', Gaming: '<:gaming:0>', 'Lan Yan': '<:lanyan:0>',
+  Ningguang: '<:ningguang:0>', Xiangling: '<:xiangling:0>', Xingqiu: '<:xingqiu:0>', Xinyan: '<:xinyan:0>',
+  Yanfei: '<:yanfei:0>', Yaoyao: '<:yaoyao:0>', 'Yun Jin': '<:yunjin:0>',
+  // INAZUMA 5★
+  'Arataki Itto': '<:itto:0>', Chiori: '<:chiori:0>', 'Kaedehara Kazuha': '<:kazuha:0>',
+  'Kamisato Ayaka': '<:ayaka:0>', 'Kamisato Ayato': '<:ayato:0>', 'Raiden Shogun': '<:raiden:0>',
+  'Sangonomiya Kokomi': '<:kokomi:0>', 'Yae Miko': '<:yaemiko:0>', Yoimiya: '<:yoimiya:0>',
+  'Yumemizuki Mizuki': '<:mizuki:0>',
+  // INAZUMA 4★
+  Gorou: '<:gorou:0>', 'Kujou Sara': '<:sara:0>', 'Kuki Shinobu': '<:shinobu:0>', Kirara: '<:kirara:0>',
+  Sayu: '<:sayu:0>', 'Shikanoin Heizou': '<:heizou:0>', Thoma: '<:thoma:0>',
+  // SUMERU 5★
+  Alhaitham: '<:alhaitham:0>', Cyno: '<:cyno:0>', Dehya: '<:dehya:0>', Nahida: '<:nahida:0>',
+  Nilou: '<:nilou:0>', Tighnari: '<:tighnari:0>', Wanderer: '<:wanderer:0>',
+  // SUMERU 4★
+  Candace: '<:candace:0>', Collei: '<:collei:0>', Dori: '<:dori:0>', Faruzan: '<:faruzan:0>',
+  Kaveh: '<:kaveh:0>', Layla: '<:layla:0>', Sethos: '<:sethos:0>',
+  // FONTAINE 5★
+  Arlecchino: '<:arlecchino:0>', Clorinde: '<:clorinde:0>', Emilie: '<:emilie:0>',
+  Escoffier: '<:escoffier:0>', Furina: '<:furina:0>', Lyney: '<:lyney:0>',
+  Navia: '<:navia:0>', Neuvillette: '<:neuvillette:0>', Sigewinne: '<:sigewinne:0>',
+  Wriothesley: '<:wriothesley:0>',
+  // FONTAINE 4★
+  Charlotte: '<:charlotte:0>', Chevreuse: '<:chevreuse:0>', Freminet: '<:freminet:0>', Lynette: '<:lynette:0>',
+  // NATLAN 5★
+  Chasca: '<:chasca:0>', Citlali: '<:citlali:0>', Kinich: '<:kinich:0>',
+  Mavuika: '<:mavuika:0>', Mualani: '<:mualani:0>', Xilonen: '<:xilonen:0>', Varesa: '<:varesa:0>',
+  // NATLAN 4★
+  Iansan: '<:iansan:0>', Ifa: '<:ifa:0>', Kachina: '<:kachina:0>', Ororon: '<:ororon:0>',
+  // NOD-KRAI 5★
+  Columbina: '<:columbina:0>', Ineffa: '<:ineffa:0>', Lauma: '<:lauma:0>',
+  Linnea: '<:linnea:0>', Flins: '<:flins:0>',
+  // NOD-KRAI 4★
+  Aino: '<:aino:0>', Illuga: '<:illuga:0>', Jahoda: '<:jahoda:0>',
+  // INDEPENDENT
+  Skirk: '<:skirk:0>', Tartaglia: '<:tartaglia:0>',
+};
+
+// Helper to get character emoji (falls back to element emoji)
+function getCharEmoji(name) {
+  return charEmoji[name] || elementEmoji[genshinCharacters.find(c => c.name === name)?.element] || '❓';
+}
+
+
 
 // ===== ALL GENSHIN CHARACTERS =====
 const genshinCharacters = [
@@ -254,7 +314,7 @@ function buildCharListEmbed(page) {
     const l = arr[arr.length - 1].name[0].toUpperCase();
     return f === l ? `(${f})` : `(${f}–${l})`;
   };
-  const formatCol = (arr) => arr.length ? arr.map(c => `[${c.name}](${c.icon}) ${c.name}`).join('\n') : '\u200b';
+  const formatCol = (arr) => arr.length ? arr.map(c => `${getCharEmoji(c.name)} ${c.name}`).join('\n') : '\u200b';
   const endIndex = Math.min(start + CHARS_PER_PAGE, sortedChars.length);
   return new EmbedBuilder()
     .setColor(0x5865F2)
@@ -287,8 +347,8 @@ function buildInventoryEmbed(target, data, page, totalPages) {
   const list = shown.map(c => {
     const dup = c.count > 1 ? ` ×${c.count}` : '';
     const star = c.stars === 5 ? '🌟' : '✨';
-    const elem = elementEmoji[c.element] || '✨';
-    return `${star} **${c.name}**${dup} — ${elem} ${c.element} ${'⭐'.repeat(c.stars)}`;
+    const emoji = getCharEmoji(c.name);
+    return `${star} ${emoji} **${c.name}**${dup} — ${elementEmoji[c.element]} ${c.element} ${'⭐'.repeat(c.stars)}`;
   }).join('\n');
 
   return new EmbedBuilder()
@@ -313,12 +373,12 @@ function buildPull10Embed(user, results, updatedPlayer) {
   const featuredChar = fiveStarResults.length > 0 ? fiveStarResults[0].char : results[results.length - 1].char;
 
   const pullList = results.map((r, i) => {
-    const elem = elementEmoji[r.char.element] || '✨';
+    const emoji = getCharEmoji(r.char.name);
     const stars = '⭐'.repeat(r.char.stars);
     if (r.is5Star) {
-      return `✦ [${r.char.name}](${r.char.icon}) **${r.char.name}** ${stars} — ${elem} ${r.char.element} 🌟`;
+      return `✦ ${emoji} **${r.char.name}** ${stars} — ${elementEmoji[r.char.element]} ${r.char.element} 🌟`;
     }
-    return `[${r.char.name}](${r.char.icon}) **${r.char.name}** ${stars} — ${elem} ${r.char.element}`;
+    return `${emoji} **${r.char.name}** ${stars} — ${elementEmoji[r.char.element]} ${r.char.element}`;
   }).join('\n');
 
   return new EmbedBuilder()
@@ -591,9 +651,14 @@ client.on('interactionCreate', async interaction => {
     }
 
     if (name === 'inventory') {
-      await interaction.deferReply();
       const target = interaction.options.getUser('user') || interaction.user;
-      const data = await Player.findOne({ userId: target.id });
+      let data;
+      try {
+        data = await Player.findOne({ userId: target.id });
+      } catch (e) {
+        console.error('DB error:', e);
+        return interaction.reply({ content: '❌ Database error. Please try again.', ephemeral: true });
+      }
       if (!data || data.characters.length === 0) {
         return interaction.editReply({
           embeds: [new EmbedBuilder().setColor(0x5865F2).setTitle(`📦 ${target.username}'s Collection`)
@@ -613,7 +678,7 @@ client.on('interactionCreate', async interaction => {
       const totalPages = Math.max(1, Math.ceil(sorted.length / 10));
       const embed = buildInventoryEmbed(target, data, 1, totalPages);
       const row = buildInvButtons(target.id, 1, totalPages);
-      return interaction.editReply({ embeds: [embed], components: totalPages > 1 ? [row] : [] });
+      return interaction.reply({ embeds: [embed], components: totalPages > 1 ? [row] : [] });
     }
 
     if (name === 'gift') {
