@@ -38,7 +38,6 @@ const playerSchema = new mongoose.Schema({
   primogems: { type: Number, default: 0 },
   pity: { type: Number, default: 0 },
   guaranteed: { type: Boolean, default: false },
-  lastDaily: { type: Date, default: null },
   lastBuy: { type: Date, default: null },
   boughtToday: { type: Number, default: 0 },
   characters: [
@@ -203,7 +202,7 @@ const chars = uniqueChars;
 const sortedChars = [...chars].sort((a, b) => a.name.localeCompare(b.name));
 
 const PULL_COST = 160;
-const BUY_LIMIT = 20000;
+const BUY_LIMIT = 2000;
 const afkUsers = new Map();
 const CHARS_PER_PAGE = 60;
 
@@ -517,16 +516,14 @@ client.on('interactionCreate', async interaction => {
       return interaction.reply({
         embeds: [new EmbedBuilder().setColor(0xFFD700).setTitle('🛒 Primogem Shop')
           .setDescription([
-            '> Buy Primogems to wish for characters!\n',
-            '**🆓 Free** — 💎 60 Primogems → `/daily` *(every 24h)*',
+            '> Buy Primogems to wish for characters!\n',          
             '**💳 Buy** — 💎 Up to 20,000 per day → `/buy <amount>`',
             '**🎁 Gift** — 💎 Unlimited → `/gift @user <amount>` *(Owner only)*\n',
             '> 💡 **1 Pull = 160 Primogems**',
-            '> 💡 **10 Pulls = 1600 Primogems**',
             '> 💡 **Soft Pity starts at pull 74**',
             '> 💡 **Hard Pity = pull 90 (guaranteed 5★)**',
           ].join('\n'))
-          .setFooter({ text: 'Use /daily every day to earn free Primogems!' })]
+          .setFooter({ text: 'Use /Buy every day to buy Primogems!' })]
       });
     } 
 
@@ -560,13 +557,13 @@ client.on('interactionCreate', async interaction => {
     if (name === 'pull') {
       let player = await Player.findOneAndUpdate(
         { userId: interaction.user.id },
-        { $setOnInsert: { username: interaction.user.username, primogems: 0, pity: 0, guaranteed: false, lastDaily: null, characters: [] } },
+        { $setOnInsert: { username: interaction.user.username, primogems: 0, pity: 0, guaranteed: false, characters: [] } },
         { upsert: true, new: true }
       );
       if (player.primogems < PULL_COST) {
         return interaction.reply({
           embeds: [new EmbedBuilder().setColor(0xFF5555).setTitle('❌ Not Enough Primogems!')
-            .setDescription(`You need **160 💎** to pull!\n\nYou have: **${player.primogems} 💎**\n\nGet more with **/daily** or **/buy**!`)]
+            .setDescription(`You need **160 💎** to pull!\n\nYou have: **${player.primogems} 💎**\n\nGet more with **/buy**!`)]
         });
       }
       const { char, is5Star } = doWish(player);
