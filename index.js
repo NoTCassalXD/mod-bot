@@ -435,11 +435,15 @@ const commands = [
 client.once('ready', async () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
   const rest = new REST({ version: '10' }).setToken(TOKEN);
+
   try {
-    await rest.put(Routes.applicationCommands(CLIENT_ID), { body: commands.map(c => c.toJSON()) });
-    console.log(`✅ Registered ${commands.length} commands! Loaded ${chars.length} characters.`);
+    await rest.put(
+      Routes.applicationCommands(CLIENT_ID),
+      { body: [] }
+    );
+    console.log("🧹 Cleared all commands!");
   } catch (err) {
-    console.error('❌ Failed to register commands:', err);
+    console.error(err);
   }
 });
 
