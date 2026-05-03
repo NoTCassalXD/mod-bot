@@ -204,6 +204,7 @@ const sortedChars = [...chars].sort((a, b) => a.name.localeCompare(b.name));
 
 const PULL_COST = 160;
 const BUY_LIMIT = 20000;
+const afkUsers = new Map();
 const CHARS_PER_PAGE = 60;
 
 const roasts = [
@@ -382,31 +383,52 @@ function buildInvButtons(userId, page, totalPages) {
 // ===== COMMANDS =====
 const commands = [
   new SlashCommandBuilder().setName('pull').setDescription('Pull a Genshin character (costs 160 💎)'),
-  new SlashCommandBuilder().setName('pull10').setDescription('Pull 10 times (costs 1600 💎)'),
-  new SlashCommandBuilder().setName('daily').setDescription('Claim your daily 60 Primogems 💎'),
+
   new SlashCommandBuilder().setName('shop').setDescription('View the Primogem shop 🛒'),
+
   new SlashCommandBuilder().setName('buy').setDescription('Buy Primogems (20k limit per 24h) 💳')
-    .addIntegerOption(o => o.setName('amount').setDescription('Amount to buy (max 20000 per day)').setRequired(true)),
-  new SlashCommandBuilder().setName('gift').setDescription('Gift Primogems to a user (Owner only) 🎁')
-    .addUserOption(o => o.setName('user').setDescription('User to gift to').setRequired(true))
-    .addIntegerOption(o => o.setName('amount').setDescription('Amount of Primogems').setRequired(true)),
-  new SlashCommandBuilder().setName('inventory').setDescription('View your pulled Genshin characters 📦')
-    .addUserOption(o => o.setName('user').setDescription("View another user's inventory")),
-  new SlashCommandBuilder().setName('character-list').setDescription('View all available Genshin Impact characters 📋'),
-  new SlashCommandBuilder().setName('avatar').setDescription("Show a user's avatar")
-    .addUserOption(o => o.setName('user').setDescription('User (leave empty for yourself)')),
+    .addIntegerOption(o => o.setName('amount').setDescription('Amount to buy').setRequired(true)),
+
+  new SlashCommandBuilder().setName('gift').setDescription('Gift Primogems 🎁')
+    .addUserOption(o => o.setName('user').setRequired(true))
+    .addIntegerOption(o => o.setName('amount').setRequired(true)),
+
+  new SlashCommandBuilder().setName('inventory').setDescription('View inventory 📦')
+    .addUserOption(o => o.setName('user')),
+
+  new SlashCommandBuilder().setName('avatar').setDescription("Show avatar")
+    .addUserOption(o => o.setName('user')),
+
   new SlashCommandBuilder().setName('coinflip').setDescription('Flip a coin'),
-  new SlashCommandBuilder().setName('serverinfo').setDescription('Show server info'),
-  new SlashCommandBuilder().setName('userinfo').setDescription('Show info about a user')
-    .addUserOption(o => o.setName('user').setDescription('User (leave empty for yourself)')),
-  new SlashCommandBuilder().setName('roast').setDescription('Roast someone 🔥')
-    .addUserOption(o => o.setName('user').setDescription('User to roast').setRequired(true)),
-  new SlashCommandBuilder().setName('say').setDescription('Make the bot say something')
-    .addStringOption(o => o.setName('text').setDescription('Message to send').setRequired(true)),
-  new SlashCommandBuilder().setName('meme').setDescription('Get a random meme'),
-  new SlashCommandBuilder().setName('love').setDescription('Check love compatibility ❤️')
-    .addUserOption(o => o.setName('user1').setDescription('First user').setRequired(true))
-    .addUserOption(o => o.setName('user2').setDescription('Second user').setRequired(true)),
+  new SlashCommandBuilder().setName('serverinfo').setDescription('Server info'),
+  new SlashCommandBuilder().setName('userinfo').setDescription('User info')
+    .addUserOption(o => o.setName('user')),
+
+  new SlashCommandBuilder().setName('roast').setDescription('Roast someone')
+    .addUserOption(o => o.setName('user').setRequired(true)),
+
+  new SlashCommandBuilder().setName('say').setDescription('Bot says something')
+    .addStringOption(o => o.setName('text').setRequired(true)),
+
+  new SlashCommandBuilder().setName('meme').setDescription('Random meme'),
+
+  new SlashCommandBuilder().setName('love').setDescription('Love meter')
+    .addUserOption(o => o.setName('user1').setRequired(true))
+    .addUserOption(o => o.setName('user2').setRequired(true)),
+
+  // ✅ NEW
+  new SlashCommandBuilder()
+    .setName('afk')
+    .setDescription('Set AFK')
+    .addUserOption(o => o.setName('user').setRequired(true))
+    .addStringOption(o => o.setName('reason')),
+
+  new SlashCommandBuilder()
+    .setName('send-codes')
+    .setDescription('Send Genshin redeem codes')
+    .addStringOption(o => o.setName('code1').setRequired(true))
+    .addStringOption(o => o.setName('code2'))
+    .addStringOption(o => o.setName('code3')),
 ];
 
 // ===== REGISTER COMMANDS =====
@@ -472,43 +494,19 @@ client.on('interactionCreate', async interaction => {
   if (!interaction.isChatInputCommand()) return;
   const name = interaction.commandName;
 
+  if (name === 'afk') {
+    const user = interaction.options.getUser('user');
+    const reason = interaction.options.getString('reason') || 'No reason provided';
+  
+    afkUsers.set(user.id, { reason, time: Date.now() });
+  
+    return interaction.reply({
+      content: `💤 ${user.username} is now AFK — ${reason}`
+    });
+  }
+
   try {
 
-    if (name === 'character-list') {
-      const totalPages = Math.ceil(sortedChars.length / CHARS_PER_PAGE);
-      const embed = buildCharListEmbed(1);
-      const row = buildCharListButtons(1);
-      return interaction.reply({ embeds: [embed], components: [row] });
-    }
-
-    if (name === 'daily') {
-      const player = await Player.findOneAndUpdate(
-        { userId: interaction.user.id },
-        { $setOnInsert: { username: interaction.user.username, primogems: 0, pity: 0, guaranteed: false, lastDaily: null, characters: [] } },
-        { upsert: true, new: true }
-      );
-      const now = new Date();
-      const last = player.lastDaily ? new Date(player.lastDaily) : null;
-      const hoursSince = last ? (now - last) / 1000 / 60 / 60 : 999;
-      if (hoursSince < 24) {
-        const nextDaily = new Date(last.getTime() + 24 * 60 * 60 * 1000);
-        return interaction.reply({
-          embeds: [new EmbedBuilder().setColor(0xFF5555).setTitle('⏰ Already Claimed!')
-            .setDescription(`Come back later! ⏳\nNext reset: <t:${Math.floor(nextDaily.getTime() / 1000)}:R>`)]
-        });
-      }
-      await Player.findOneAndUpdate(
-        { userId: interaction.user.id },
-        { $inc: { primogems: 60 }, $set: { lastDaily: now, username: interaction.user.username } }
-      );
-      const updated = await Player.findOne({ userId: interaction.user.id });
-      return interaction.reply({
-        embeds: [new EmbedBuilder().setColor(0xFFD700).setTitle('💎 Daily Primogems Claimed!')
-          .setDescription(`You received **60 💎 Primogems!**\n\n**Total Balance:** ${updated.primogems} 💎\n\nCome back tomorrow! 🌟`)
-          .setThumbnail(interaction.user.displayAvatarURL())
-          .setFooter({ text: 'Use /pull to wish for characters!' })]
-      });
-    }
 
     if (name === 'shop') {
       return interaction.reply({
@@ -524,6 +522,33 @@ client.on('interactionCreate', async interaction => {
             '> 💡 **Hard Pity = pull 90 (guaranteed 5★)**',
           ].join('\n'))
           .setFooter({ text: 'Use /daily every day to earn free Primogems!' })]
+      });
+    } 
+
+    if (name === 'send-codes') {
+      const codes = [
+        interaction.options.getString('code1'),
+        interaction.options.getString('code2'),
+        interaction.options.getString('code3')
+      ].filter(Boolean);
+    
+      const rows = codes.map(code =>
+        new ActionRowBuilder().addComponents(
+          new ButtonBuilder()
+            .setLabel(`Redeem ${code}`)
+            .setStyle(ButtonStyle.Link)
+            .setURL(`https://genshin.hoyoverse.com/en/gift?code=${code}`)
+        )
+      );
+    
+      return interaction.reply({
+        embeds: [
+          new EmbedBuilder()
+            .setColor(0x00FFAA)
+            .setTitle('🎁 Genshin Redeem Codes')
+            .setDescription(codes.map(c => `🔹 ${c}`).join('\n'))
+        ],
+        components: rows
       });
     }
 
@@ -562,38 +587,6 @@ client.on('interactionCreate', async interaction => {
       });
     }
 
-    if (name === 'pull10') {
-      let player = await Player.findOneAndUpdate(
-        { userId: interaction.user.id },
-        { $setOnInsert: { username: interaction.user.username, primogems: 0, pity: 0, guaranteed: false, lastDaily: null, characters: [] } },
-        { upsert: true, new: true }
-      );
-      const cost = PULL_COST * 10;
-      if (player.primogems < cost) {
-        return interaction.reply({
-          embeds: [new EmbedBuilder().setColor(0xFF5555).setTitle('❌ Not Enough Primogems!')
-            .setDescription(`You need **1600 💎** for 10 pulls!\n\nYou have: **${player.primogems} 💎**\n\nGet more with **/daily** or **/buy**!`)]
-        });
-      }
-      const results = [];
-      const charsToAdd = [];
-      for (let i = 0; i < 10; i++) {
-        const { char, is5Star } = doWish(player);
-        results.push({ char, is5Star });
-        charsToAdd.push({ name: char.name, stars: char.stars, element: char.element, icon: char.icon, image: char.image, color: char.color, pulledAt: new Date() });
-      }
-      await Player.findOneAndUpdate(
-        { userId: interaction.user.id },
-        {
-          $inc: { primogems: -cost },
-          $set: { pity: player.pity, guaranteed: player.guaranteed, username: interaction.user.username },
-          $push: { characters: { $each: charsToAdd } }
-        }
-      );
-      const updatedPlayer = await Player.findOne({ userId: interaction.user.id });
-      const embed = buildPull10Embed(interaction.user, results, updatedPlayer);
-      return interaction.reply({ embeds: [embed] });
-    }
 
     if (name === 'inventory') {
       await interaction.deferReply();
@@ -756,6 +749,22 @@ client.on('interactionCreate', async interaction => {
     } else if (interaction.deferred) {
       interaction.editReply({ content: '❌ Something went wrong.' });
     }
+  }
+});
+
+client.on('messageCreate', message => {
+  if (message.author.bot) return;
+
+  const mentioned = message.mentions.users.first();
+
+  if (mentioned && afkUsers.has(mentioned.id)) {
+    const afk = afkUsers.get(mentioned.id);
+    message.reply(`💤 ${mentioned.username} is AFK — ${afk.reason}`);
+  }
+
+  if (afkUsers.has(message.author.id)) {
+    afkUsers.delete(message.author.id);
+    message.reply('👋 Welcome back! AFK removed.');
   }
 });
 
