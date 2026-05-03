@@ -439,11 +439,12 @@ client.once('ready', async () => {
   try {
     await rest.put(
       Routes.applicationCommands(CLIENT_ID),
-      { body: [] }
+      { body: commands.map(c => c.toJSON()) }
     );
-    console.log("🧹 Cleared all commands!");
+
+    console.log(`✅ Registered ${commands.length} commands!`);
   } catch (err) {
-    console.error(err);
+    console.error('❌ Failed to register commands:', err);
   }
 });
 
